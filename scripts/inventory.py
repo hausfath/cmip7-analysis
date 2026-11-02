@@ -1,5 +1,5 @@
 """Query ESGF CMIP7 STAC indexes (east+west) for monthly global variables needed
-for GMST and climate-sensitivity assessment. Writes inventory/*.csv."""
+for GSAT and climate-sensitivity assessment. Writes inventory/*.csv."""
 import sys, pathlib
 import pandas as pd
 import intake_esgf

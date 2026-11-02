@@ -1,4 +1,4 @@
-# CMIP7 initial assessment: GMST and climate sensitivity — METHODS
+# CMIP7 analysis: warming and climate sensitivity (methods)
 
 Status: **first complete pass** (snapshot of ESGF holdings taken 2026-10-24; all 2,419 manifest files acquired). CMIP7 publication
 is ongoing daily; every number here is specific to that snapshot and will change.
@@ -63,7 +63,7 @@ is ongoing daily; every number here is specific to that snapshot and will change
     branches at 2022-01-01 in the parent's time axis.
 
 ### 1.2 Observations
-- GMST ensemble (10,000 members, 1850–2025, anomalies vs 1850–1900 by construction), the build of
+- GSAT ensemble (10,000 members, 1850–2025, anomalies vs 1850–1900 by construction), the build of
   2026-09-24 (HadCRUT5 5.2.0.0). The full ensemble is not public. `data/obs/` vendors the only obs
   statistics this analysis uses: the annual median, 5 %, 95 % and mean (`annual_summary.csv`), and each
   metric's median, 5 %, 95 % and SD over the members (`metric_summary.csv`). `scripts/gmst.py --obs <file>`
@@ -75,10 +75,12 @@ is ongoing daily; every number here is specific to that snapshot and will change
   1.09 [0.95–1.20] °C.
 - The ensemble is anomalised so that the *cross-member* mean over 1850–1900 is zero; individual
   members are not, so per-member warming metrics include baseline uncertainty (intended).
-- Convention: obs GMST treated as equivalent to model GSAT (`tas`); **no** blended-tas/masking
-  correction (project convention: Ch. 2 finds the GSAT-product median matches GMST over 1950–2021 and
-  1980–2021). Direction of the omitted effect: if model blended-SST warming is smaller than model `tas`
-  warming, comparing `tas` with GMST makes models look *warmer* relative to obs, so "too warm" findings
+- Naming: following the chapter convention from the SOD onward, the observational ensemble is called the
+  GSAT ensemble and treated as equivalent to GSAT (Ch. 2 finds the GSAT-product median matches the
+  GMST-product median over 1950–2021 and 1980–2021). It is compared directly with model `tas`, with
+  **no** blended-tas/masking correction. Direction of the omitted effect: to the extent the observations
+  reflect SST rather than air temperature over the ocean, and model blended warming is smaller than model
+  `tas` warming, comparing `tas` with the observations makes models look *warmer* relative to obs, so "too warm" findings
   are, if anything, overstated and "too cool" findings understated. Rather than assume a size for the
   effect, `historical_metrics.csv` reports `<metric>_reduction_to_consistent`: the fractional reduction
   of model warming that would bring a too-warm model to the one-sided 5 % consistency threshold.
@@ -163,7 +165,7 @@ was computed.
   linear convention is the headline TCR and rm21 is reported as a sensitivity.
 - The ±1 yr branch shifts move CMIP7 ECS by ≤ 0.01 °C and TCR by ≤ 0.004 °C (`outputs/cmip7_sensitivity.csv`).
 
-### 2.6 Historical GMST (`scripts/gmst.py`)
+### 2.6 Historical warming (`scripts/gmst.py`)
 - Per member: annual tas → anomaly vs that member's own 1850–1900 mean. Historical runs are truncated
   at 2021 (ACCESS-ESM1-6 and one UKCM2a-0-HH member extend to 2022).
 - Per model: the value is the **mean of per-member metrics** over members covering the window
@@ -179,11 +181,11 @@ was computed.
   0.006 °C/decade (1980–2024 trend), both UKCM2a-0-HH (n = 2); ≤ 0.012 °C and ≤ 0.004 °C/decade for the
   others. Per-member differences are larger (chaotic divergence after the branch) and are not a splice
   error.
-- Metrics vs GMST ensemble:
+- Metrics vs GSAT ensemble:
   1. Warming 2012–2021 vs 1850–1900 (every model; no splice needed). Also 2011–2020 for AR6 comparison.
   2. Warming 2015–2024 vs 1850–1900 (spliced models only).
   3. OLS trends 1980–2021, 1950–2021 (Ch. 2 GMST-vs-GSAT comparison periods) and 1980–2024 (spliced).
-- Obs uncertainty: distribution of each metric across the 10,000 GMST-ensemble members (median,
+- Obs uncertainty: distribution of each metric across the 10,000 GSAT-ensemble members (median,
   5–95 %, SD).
 - **Consistency test** (`<metric>_z`): z = (model value − obs median) / σ, with
   σ² = σ_obs² + σ_iv² (1 + 1/n). The model value is an n-member mean; obs is one realisation, hence
@@ -277,7 +279,7 @@ Descriptive counterpart to fig02 for CMIP6, from the H22 supporting data (Zenodo
   CMIP7 ensemble statistics are not representative of the eventual CMIP7 ensemble.
 - 150-yr Gregory ECS is an *effective* sensitivity and underestimates the long-run equilibrium for
   models with a strong pattern effect.
-- No GMST blending/masking correction (see 1.2); the omitted effect would, if anything, reduce
+- No blending/masking correction (see 1.2); the omitted effect would, if anything, reduce
   apparent model warm bias.
 - The consistency test assumes model internal variability is realistic; using member spread from
   esm-hist includes carbon-cycle variability. With 2–3 members (UKESM1-3-LL historical, UKCM2a-0-HH),

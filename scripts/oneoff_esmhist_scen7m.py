@@ -1,5 +1,5 @@
 """One-off: every CMIP7 emissions-driven historical member (esm-hist), continued with esm-scen7-m
-to 2026 where published, against the GMST ensemble. Not part of the report.
+to 2026 where published, against the GSAT ensemble. Not part of the report.
 
   python -I scripts/oneoff_esmhist_scen7m.py  ->  figures/oneoff_esmhist_scen7m.{png,pdf}
 
@@ -35,7 +35,7 @@ def members(model):
 
 def main():
     S.setup()
-    obs = pd.read_csv(OUT / "obs_gmst_ensemble_summary.csv", index_col=0).loc[:OBS_END]
+    obs = pd.read_csv(OUT / "obs_gsat_ensemble_summary.csv", index_col=0).loc[:OBS_END]
     fig, ax = plt.subplots(figsize=(S.WIDTH, 100 * S.MM))
     handles, notes, ends = [], [], []
     for model in MODELS:
@@ -55,7 +55,7 @@ def main():
             notes.append(f"{n_extra} {model} members without an esm-scen7-m run are drawn to 2021 and left out of its mean")
     ax.fill_between(obs.index, obs.p05, obs.p95, color=S.OBS_BAND, alpha=0.7, lw=0, zorder=3)
     ax.plot(obs.index, obs["median"], color=S.OBS, lw=1.2, zorder=5)
-    ends.append([obs["median"].iloc[-1], f"GMST ensemble ({OBS_END})", S.OBS, OBS_END])
+    ends.append([obs["median"].iloc[-1], f"GSAT ensemble ({OBS_END})", S.OBS, OBS_END])
     # direct labels at the right edge, nudged apart (min gap in °C), joined to each line end
     ends.sort()
     GAP = 0.14
@@ -72,8 +72,8 @@ def main():
     ax.set_xticks(range(1860, END + 1, 20))
     ax.spines["bottom"].set_bounds(1850, END + 1)
     ax.set_ylabel("°C vs 1850–1900")
-    handles += [Line2D([], [], color=S.OBS, lw=1.2, label=f"GMST ensemble median (to {OBS_END})"),
-                Patch(color=S.OBS_BAND, label="GMST ensemble 5–95%"),
+    handles += [Line2D([], [], color=S.OBS, lw=1.2, label=f"GSAT ensemble median (to {OBS_END})"),
+                Patch(color=S.OBS_BAND, label="GSAT ensemble 5–95%"),
                 Line2D([], [], color="#999", lw=0.6, label="Individual members")]
     fig.legend(handles=handles, loc="lower center", ncol=3, frameon=False, bbox_to_anchor=(0.5, -0.11))
     fig.tight_layout(rect=(0, 0.02, 1, 0.83))

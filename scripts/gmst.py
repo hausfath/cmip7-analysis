@@ -1,8 +1,8 @@
-"""CMIP7 historical and projected GSAT vs the GMST ensemble (METHODS.md §2.6–2.8).
+"""CMIP7 historical and projected GSAT vs the GSAT ensemble (METHODS.md §2.6–2.8).
 
   python -I scripts/gmst.py                       obs from the vendored summaries in data/obs/
   python -I scripts/gmst.py --obs <ensemble.csv>  rebuild data/obs/ from the full 10,000-member
-                                                  GMST ensemble (not public), then run
+                                                  GSAT ensemble (not public), then run
 
 Only the obs statistics this script uses are vendored: the annual median / 5 / 95 % / mean, and
 the median, 5 / 95 % and SD of each metric over the members. Both modes give identical outputs.
@@ -17,7 +17,7 @@ Outputs
                                           run's own 1850–1900 mean), one column per member.
                                           Historical tracks are spliced to a scenario
                                           (preference m > h > vl) when one exists.
-  outputs/obs_gmst_ensemble_summary.csv   obs median / 5 / 95 % per year
+  outputs/obs_gsat_ensemble_summary.csv   obs median / 5 / 95 % per year
   outputs/historical_metrics.csv          per model × track, plus obs row
   outputs/projection_metrics.csv          per model × scenario
   outputs/splice_sensitivity.csv          ensemble-mean 2015–2024 warming and 1980–2024 trend with each
@@ -213,11 +213,11 @@ def main():
     OUT.mkdir(exist_ok=True)
     if "--obs" in sys.argv:
         vendor_obs(sys.argv[sys.argv.index("--obs") + 1])
-    pd.read_csv(OBS_DIR / "annual_summary.csv", index_col=0).to_csv(OUT / "obs_gmst_ensemble_summary.csv")
+    pd.read_csv(OBS_DIR / "annual_summary.csv", index_col=0).to_csv(OUT / "obs_gsat_ensemble_summary.csv")
     st = pd.read_csv(OBS_DIR / "metric_summary.csv", index_col=0)
     print(f"obs 2011–2020 vs 1850–1900: {st.loc['dT_2011_2020', 'median']:.3f} [{st.loc['dT_2011_2020', 'p05']:.3f}, "
           f"{st.loc['dT_2011_2020', 'p95']:.3f}] (AR6: {AR6_2011_2020[0]} [{AR6_2011_2020[1]}, {AR6_2011_2020[2]}])")
-    hist_rows = [{"model": "GMST ensemble (obs)", "track": "obs", "n_members": int(st.n_members.iloc[0]),
+    hist_rows = [{"model": "GSAT ensemble (obs)", "track": "obs", "n_members": int(st.n_members.iloc[0]),
                   **st["median"].to_dict(), **{f"{k}_p05": v for k, v in st.p05.items()},
                   **{f"{k}_p95": v for k, v in st.p95.items()}, **{f"{k}_sd": v for k, v in st.sd.items()}}]
     proj_rows, splice_all, checks_all, drift_all = [], [], [], []

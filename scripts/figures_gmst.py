@@ -1,8 +1,8 @@
-"""GMST figures from derived/gmst and outputs/*.csv (no raw data needed).
+"""Warming figures from derived/gmst and outputs/*.csv (no raw data needed).
 
   python -I scripts/figures_gmst.py
 
-fig01_historical_small_multiples  per-model GSAT vs the GMST ensemble, 1850–2024
+fig01_historical_small_multiples  per-model GSAT vs the GSAT ensemble, 1850–2024
 fig02_historical_metrics          2012–2021 warming and 1980–2021 trend per model × track
 fig02b_historical_metrics_cmip6   the same metrics for CMIP6 (Hausfather et al. 2022 data, one member per
                                   model); descriptive only, no consistency test
@@ -54,8 +54,8 @@ def fig01(obs, hm):
     for ax in axs[:, 0]:
         ax.set_ylabel("°C vs 1850–1900")
     o = hm[hm.track == "obs"].iloc[0]
-    handles = [Line2D([], [], color=S.OBS, lw=1.2, label=f"GMST ensemble median (2012–2021: {o.dT_2012_2021:.2f} °C)"),
-               Patch(color=S.OBS_BAND, label="GMST ensemble 5–95%"),
+    handles = [Line2D([], [], color=S.OBS, lw=1.2, label=f"GSAT ensemble median (2012–2021: {o.dT_2012_2021:.2f} °C)"),
+               Patch(color=S.OBS_BAND, label="GSAT ensemble 5–95%"),
                Line2D([], [], color=S.TRACK_COLOR["historical"], lw=1.4, label="Concentration-driven (historical) mean"),
                Line2D([], [], color=S.TRACK_COLOR["esm-hist"], lw=1.4, label="Emissions-driven (esm-hist) mean"),
                Patch(color="#999", alpha=0.35, label="Member range")]
@@ -87,13 +87,13 @@ def fig02(hm):
             ax.plot(r[k], yi, "o", ms=4.5, color=c, mec="white", mew=0.6)
         ax.set_xlabel(lab)
         ax.grid(axis="y", visible=False)
-        ax.text(obs[k], len(rows) - 0.3, f" GMST ensemble {obs[k]:.2f}", fontsize=6, color=S.OBS, va="bottom")
+        ax.text(obs[k], len(rows) - 0.3, f" GSAT ensemble {obs[k]:.2f}", fontsize=6, color=S.OBS, va="bottom")
     axs[0].set_yticks(y, rows.label)
     axs[0].set_ylim(-0.7, len(rows) + 0.4)
     handles = [Line2D([], [], marker="o", ls="", color=S.TRACK_COLOR["historical"], label="Concentration-driven mean"),
                Line2D([], [], marker="o", ls="", color=S.TRACK_COLOR["esm-hist"], label="Emissions-driven mean"),
                Line2D([], [], color="#999", lw=1.6, label="Member range"),
-               Patch(color=S.OBS_BAND, label="GMST ensemble 5–95%")]
+               Patch(color=S.OBS_BAND, label="GSAT ensemble 5–95%")]
     fig.legend(handles=handles, loc="lower center", ncol=4, frameon=False, bbox_to_anchor=(0.55, -0.06))
     fig.tight_layout(rect=(0, 0.02, 1, 0.82))
     # Title bound to the computed consistency test (z > 1.645: one-sided 5%, obs uncertainty
@@ -106,7 +106,7 @@ def fig02(hm):
     ts = rows.dropna(subset=["dT_2012_2021_driftcorr_seg_z"]).groupby("model").dT_2012_2021_driftcorr_seg_z
     n_hot_seg = int((ts.min() > 1.645).sum())
     S.titles(fig, f"{n_hot} of {t.ngroups} CMIP7 models tested warm more than observed over 2012–2021",
-             "Ensemble mean (dot) and member range (bar) of tas; GMST ensemble median (line) and 5–95% (shading).\n"
+             "Ensemble mean (dot) and member range (bar) of tas; GSAT ensemble median (line) and 5–95% (shading).\n"
              "Counted if every track exceeds obs at one-sided 5% (obs uncertainty + internal variability)"
              + (f"; {split} exceeds in one track only" if n_split else "")
              + f".\nNot tested (no control run): {', '.join(untested)}. With each member's contemporaneous "
@@ -138,7 +138,7 @@ def fig02b(h6):
         ax.set_xlabel(lab)
         ax.grid(axis="y", visible=False)
         box = dict(facecolor="white", edgecolor="none", pad=0.6)
-        ax.text(obs[k], len(rows) - 0.3, f" GMST ensemble {obs[k]:.2f}", fontsize=6, color=S.OBS, va="bottom",
+        ax.text(obs[k], len(rows) - 0.3, f" GSAT ensemble {obs[k]:.2f}", fontsize=6, color=S.OBS, va="bottom",
                 bbox=box)
         # median label on the side away from the obs line
         ax.text(med, len(rows) + 0.9, f" CMIP6 median {med:.2f} " , fontsize=6, color=S.INK2, va="bottom",
@@ -152,13 +152,13 @@ def fig02b(h6):
                Line2D([], [], marker="o", ls="", color=c_pred, label="Predecessor of a CMIP7 model"),
                Line2D([], [], color="#999", lw=1.6, label="Range across SSP splices"),
                Line2D([], [], color=S.INK2, lw=0.8, ls=(0, (3, 2)), label="CMIP6 median"),
-               Patch(color=S.OBS_BAND, label="GMST ensemble 5–95%")]
+               Patch(color=S.OBS_BAND, label="GSAT ensemble 5–95%")]
     fig.legend(handles=handles, loc="lower center", ncol=5, frameon=False, bbox_to_anchor=(0.5, -0.035))
     fig.tight_layout(rect=(0, 0.01, 1, 0.885))
     n_spl = rows.n_splices.astype(int)
-    S.titles(fig, f"CMIP6 historical warming against the GMST ensemble ({len(rows)} models)",
+    S.titles(fig, f"CMIP6 historical warming against the GSAT ensemble ({len(rows)} models)",
              f"One member per model from Hausfather et al. (2022), historical spliced to SSP2-4.5 from 2015 (dot); bar spans "
-             f"the {n_spl.min()}–{n_spl.max()} available\nSSP splices. GMST ensemble median (line) and 5–95% (shading). "
+             f"the {n_spl.min()}–{n_spl.max()} available\nSSP splices. GSAT ensemble median (line) and 5–95% (shading). "
              "Descriptive only: with one member and no control run per model, no\ninternal-variability test is applied. "
              "HadGEM3-GC31-MM, the predecessor of UKCM2a-0-HH, is not in the dataset.", gap=0.03)
     S.save(fig, FIG / "fig02b_historical_metrics_cmip6")
@@ -188,7 +188,7 @@ def fig03(obs, pm):
     handles = [Line2D([], [], color=S.MODEL_COLOR[m], lw=1.6, label=m) for m in mods]
     handles += [Line2D([], [], color="#777", lw=1.2, label="Concentration-driven"),
                 Line2D([], [], color="#777", lw=1.2, ls=(0, (3, 1.5)), label="Emissions-driven"),
-                Line2D([], [], color=S.OBS, lw=1.2, label="GMST ensemble median")]
+                Line2D([], [], color=S.OBS, lw=1.2, label="GSAT ensemble median")]
     fig.legend(handles=handles, loc="lower center", ncol=4, frameon=False, bbox_to_anchor=(0.5, -0.1))
     fig.tight_layout(rect=(0, 0.02, 1, 0.84))
     S.titles(fig, "CMIP7 projections published so far",
@@ -200,7 +200,7 @@ def fig03(obs, pm):
 def main():
     S.setup()
     FIG.mkdir(exist_ok=True)
-    obs = pd.read_csv(OUT / "obs_gmst_ensemble_summary.csv", index_col=0)
+    obs = pd.read_csv(OUT / "obs_gsat_ensemble_summary.csv", index_col=0)
     hm = pd.read_csv(OUT / "historical_metrics.csv")
     pm = pd.read_csv(OUT / "projection_metrics.csv")
     fig01(obs, hm)

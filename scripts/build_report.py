@@ -139,7 +139,7 @@ def main():
     val_tab = table(["CMIP6 run", "ECS (ours)", "ECS Zelinka v2.2", "Δ", "ERF₂ₓ", "Δ", "TCR linear",
                      "TCR AR6", "Δ", "TCR rm21", "Δ vs H22"], val_rows, "num")
 
-    hist_rows = [["<b>GMST ensemble</b>", "obs", f"{int(obs.n_members):,}",
+    hist_rows = [["<b>GSAT ensemble</b>", "obs", f"{int(obs.n_members):,}",
                   f"{f2(obs.dT_2012_2021)} <span class='rng'>{f2(obs.dT_2012_2021_p05)}–{f2(obs.dT_2012_2021_p95)}</span>",
                   "", f"{f2(obs.dT_2015_2024)}", f"{f2(obs.trend_1980_2021, 3)}", "", f"{f2(obs.trend_1950_2021, 3)}",
                   ""]]
@@ -259,7 +259,7 @@ ul {{ margin: 0; padding-left: 1.2em; display: grid; gap: 6px; }}
   {moved}
   <div class="eyebrow">Working note · ESGF snapshot {SNAPSHOT}</div>
   <h1>CMIP7 first look: warming and climate sensitivity</h1>
-  <p class="lede">The first {n_models} CMIP7 models on ESGF, compared with the GMST ensemble over the historical
+  <p class="lede">The first {n_models} CMIP7 models on ESGF, compared with the GSAT ensemble over the historical
   period and with CMIP6 for effective climate sensitivity (ECS) and transient climate response (TCR). The sample is
   small ({n_ukcaau} of {n_models} models from UK, Canadian and Australian centres), so these are model-by-model results, not an ensemble
   assessment.</p>
@@ -280,7 +280,7 @@ ul {{ margin: 0; padding-left: 1.2em; display: grid; gap: 6px; }}
       <p>{n_above_lik} of {n7} remain above the AR6 likely range (2.5–4 °C) and {n_above_vl} above very likely (2–5 °C).
       For comparison, {frac6_above_lik:.0%} of CMIP6 models were above 4 °C and {frac6_above_vl:.0%} above 5 °C.</p></div>
     <div class="finding"><span class="eyebrow">Historical warming 2012–2021</span><span class="k">{n_hot} of {n_tested} too warm</span>
-      <p>The GMST ensemble gives {f2(obs.dT_2012_2021)} °C. {n_hot} of {n_tested} testable models warm significantly
+      <p>The GSAT ensemble gives {f2(obs.dT_2012_2021)} °C. {n_hot} of {n_tested} testable models warm significantly
       more in every published track ({esc(hot_txt)}).{(' ' + esc(', '.join(split)) + ' does so in one track only.') if split else ''}
       Removing the control-run drift leaves {n_hot_full} of {tf.ngroups}; removing each member's contemporaneous
       control-run trend, which also contains centennial variability, gives {n_hot_seg} of {ts.ngroups}{(' (' + esc(', '.join(drop_seg)) + ' drops out)') if drop_seg else ''}.</p></div>
@@ -325,17 +325,17 @@ ul {{ margin: 0; padding-left: 1.2em; display: grid; gap: 6px; }}
     metadata in the scenario files. The choice of scenario changes ensemble-mean 2015–2024 warming by at most
     {sp_rng:.3f} °C.</p>
     <p><b>z</b> compares the model ensemble mean with the observations, given observational uncertainty (spread of the
-    10,000-member GMST ensemble) and internal variability (member spread with ≥ 5 members, otherwise the control run).
+    10,000-member GSAT ensemble) and internal variability (member spread with ≥ 5 members, otherwise the control run).
     A model counts as warmer than observed if z &gt; 1.645 (one-sided 5%) in every published track. Models consistent with
     observations in all tracks: {esc(', '.join(cons))}. Not tested (one member, no control run): {esc(', '.join(untested))}.
     For the 1980–2021 trend, {n_trend_hot} of {tt.ngroups} testable models warm faster than observed
     ({f2(obs.trend_1980_2021, 3)} °C per decade).</p>
   </div>
-  {figure("fig01_historical_small_multiples", "Annual tas for each CMIP7 model against the GMST ensemble (black, 5–95% grey).")}
+  {figure("fig01_historical_small_multiples", "Annual tas for each CMIP7 model against the GSAT ensemble (black, 5–95% grey).")}
   {figure("fig02_historical_metrics", "2012–2021 warming and 1980–2021 trend, model ensemble mean and member range.")}
   {hist_tab}
-  <p class="note">No blending or masking adjustment is applied to model tas (project convention: the GMST ensemble is treated
-  as equivalent to GSAT). Any such adjustment would lower model warming, so it can only shrink the warm biases shown here.
+  <p class="note">No blending or masking adjustment is applied to model tas (project convention: the GSAT ensemble is compared
+  directly with model tas). Any such adjustment would lower model warming, so it can only shrink the warm biases shown here.
   <code>historical_metrics.csv</code> lists the fractional reduction in model warming that would make each warm model
   consistent. The drift-corrected column removes the full-record control-run trend (the drift itself). Removing each member's
   contemporaneous 172-yr control trend instead, which mixes drift with centennial variability, is a second sensitivity
