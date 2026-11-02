@@ -19,6 +19,7 @@ import pandas as pd
 import sys, pathlib
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))  # -I drops the script dir
 import cmiplib as L  # noqa: E402
+ZELINKA_URL = "https://raw.githubusercontent.com/mzelinka/cmip56_forcing_feedback_ecs/v2.2/cmip56_forcing_feedback_ecs.json"
 
 OUT = L.ROOT / "outputs"
 GDIR = L.ROOT / "derived" / "gregory"
@@ -97,6 +98,16 @@ def run(model, mem, pmem, load):
     return r
 
 
+def zelinka_json():
+    """Zelinka et al. (2020) v2.2 table. The source repo has no licence file, so it is fetched by tag, not vendored."""
+    f = L.ROOT / "reference" / "zelinka" / "cmip56_forcing_feedback_ecs.json"
+    if not f.exists():
+        import urllib.request
+        f.parent.mkdir(parents=True, exist_ok=True)
+        urllib.request.urlretrieve(ZELINKA_URL, f)
+    return f
+
+
 def main(mode):
     OUT.mkdir(exist_ok=True)
     GDIR.mkdir(parents=True, exist_ok=True)
@@ -104,7 +115,7 @@ def main(mode):
     if mode == "cmip6":
         ref = pd.read_csv(L.ROOT / "reference" / "hausfather2022_cmip6_ecs_tcr.csv", comment="#").set_index("model")
         ar6 = pd.read_csv(L.ROOT / "reference" / "ar6_table7sm5_cmip6_ecs_tcr.csv", comment="#").set_index("model")
-        z = json.load(open(L.ROOT / "reference" / "zelinka" / "cmip56_forcing_feedback_ecs.json"))["CMIP6"]
+        z = json.load(open(zelinka_json()))["CMIP6"]
         for m, mem, pmem in CMIP6:
             try:
                 r = run(m, mem, pmem, L.load_cmip6_val)

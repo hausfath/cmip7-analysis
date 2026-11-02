@@ -11,3 +11,4 @@ reference/t7sm5_raw.txt
 # Console logs (local paths); derived/acquire_log.csv is the acquisition record
 derived/*stdout.txt
 outputs/*stdout.txt
+reference/zelinka/

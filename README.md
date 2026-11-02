@@ -42,12 +42,16 @@ Hausfather et al. 2022 supporting data, one member each). They are not part of t
 - CMIP7 model output: ESGF, all 444 datasets CC-BY-4.0. Cite per the
   [CMIP7 terms of use](https://wcrp-cmip.github.io/cmip7-guidance/docs/CMIP7/Guidance_for_users/#2-terms-of-use-and-citations-requirements);
   dataset IDs, versions and tracking IDs are in `outputs/cmip7_dataset_table.csv`.
-- CMIP6 output: Pangeo `gs://cmip6` (CMIP6 terms of use).
+- CMIP6 output: Pangeo `gs://cmip6`. The six models used (ACCESS-ESM1-5, CanESM5, CNRM-ESM2-1,
+  HadGEM3-GC31-LL/MM, UKESM1-0-LL) are all CC BY 4.0 per the
+  [CMIP6 source_id registry](https://github.com/WCRP-CMIP/CMIP6_CVs/blob/main/CMIP6_source_id.json).
+- CMIP7 experiment definitions in `reference/cmip7_cv/`: WCRP CVs (CC BY 4.0).
 - Observations: summary statistics of a 10,000-member GMST ensemble (`data/obs/`; see METHODS §1.2).
   The full ensemble is not public; its component datasets keep their own licences.
 - CMIP6 reference ECS/TCR and CMIP6 historical/SSP GMST series: Hausfather et al. (2022) supporting data,
   [Zenodo 6476375](https://zenodo.org/records/6476375); Zelinka et al. (2020) v2.2,
-  [GitHub](https://github.com/mzelinka/cmip56_forcing_feedback_ecs); IPCC AR6 WGI Table 7.SM.5
+  [GitHub](https://github.com/mzelinka/cmip56_forcing_feedback_ecs) (no licence file, so `sensitivity.py`
+  downloads it by tag instead of shipping it); IPCC AR6 WGI Table 7.SM.5
   (values transcribed into `reference/*.csv`, source noted in each header). The H22 workbook is CC-BY-4.0.
 
 Code: [MIT licence](LICENSE). Derived model data keep the licences of the CMIP6/CMIP7 output they come from.
