@@ -1,0 +1,13 @@
+{
+ "branch_time_in_parent": "0.0",
+ "branch_time_in_child": "0.0",
+ "parent_variant_label": "r1i1p1f1",
+ "parent_time_units": "days since 1850-01-01",
+ "parent_experiment_id": "piControl",
+ "version_id": "v20200115",
+ "tracking_id": "hdl:21.14100/c7622c63-ab1c-4229-bf4e-991cda133515\nhdl:21.14100/72fdd0ff-e3c3-4014-9bc8-192d112f890e\nhdl:21.14100/fbc36349-9778-4e62-9a22-9cb94d1a0a05\nhdl:21.14100/56095b6b-59c4-4cd0-a3ad-5f94879bb413\nhdl:21.14100/f38149ae-3507-4e46-be2d-486c68256881\nhdl:21.14100/04785485-c9cb-4066-b79b-43e0d9b5a47c\nhdl:21.14100/3edbd809-b1c6-4028-81c3-b0a87bdf0e55\nhdl:21.14100/11a40b08-5cbc-4dec-8494-4b2b601cdc3b",
+ "time_units": "days since 1850-01-16 00:00:00.000000",
+ "time_units_tas": "days since 1850-01-16 00:00:00.000000",
+ "calendar": "360_day",
+ "zstore_tas": "gs://cmip6/CMIP6/CMIP/MOHC/HadGEM3-GC31-MM/1pctCO2/r1i1p1f3/Amon/tas/gn/v20200115/"
+}

@@ -1,0 +1,13 @@
+{
+ "branch_time_in_parent": "0.0",
+ "branch_time_in_child": "0.0",
+ "parent_variant_label": "r1i1p1f2",
+ "parent_time_units": "days since 1850-01-01 00:00:00",
+ "parent_experiment_id": "piControl",
+ "version_id": "v20181018",
+ "tracking_id": "hdl:21.14100/7f77190b-5149-44b2-b673-ff735f023b2f",
+ "time_units": "days since 1850-01-01",
+ "time_units_tas": "days since 1850-01-01",
+ "calendar": "gregorian",
+ "zstore_tas": "gs://cmip6/CMIP6/CMIP/CNRM-CERFACS/CNRM-ESM2-1/1pctCO2/r1i1p1f2/Amon/tas/gr/v20181018/"
+}

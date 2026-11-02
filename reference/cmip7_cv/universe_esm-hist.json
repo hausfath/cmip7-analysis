@@ -1,0 +1,22 @@
+{
+    "@context": "000_context.jsonld",
+    "id": "esm-hist",
+    "type": "experiment",
+    "description": "Simulation of the climate of the recent past (typically meaning 1850 to present-day) with prescribed carbon dioxide emissions (for prescribed carbon dioxide concentrations, see `historical`).",
+    "drs_name": "esm-hist",
+    "start_timestamp": "1850-01-01",
+    "activity": "cmip",
+    "additional_allowed_model_components": [
+        "aer",
+        "chem"
+    ],
+    "branch_information": "Branch from esm-piControl at a time of your choosing",
+    "min_ensemble_size": 1,
+    "parent_activity": "cmip",
+    "parent_experiment": "esm-picontrol",
+    "required_model_components": [
+        "aogcm",
+        "bgc"
+    ],
+    "tier": 1
+}

@@ -1,0 +1,20 @@
+{
+ "branch_time_in_parent": "39600.0",
+ "branch_time_in_child": "39600.0",
+ "parent_variant_label": "r1i1p1f2",
+ "parent_time_units": "days since 1850-01-01-00-00-00",
+ "parent_experiment_id": "piControl-spinup",
+ "version_id": "v20200828",
+ "tracking_id": "hdl:21.14100/d878c7f1-87b6-428e-a71f-4e7913531b9a",
+ "time_units": "days since 1960-01-16 00:00:00.000000",
+ "calendar": "360_day",
+ "zstore": "gs://cmip6/CMIP6/CMIP/MOHC/UKESM1-0-LL/piControl/r1i1p1f2/Amon/rlut/gn/v20200828/",
+ "time_units_tas": "days since 1960-01-16 00:00:00.000000",
+ "zstore_tas": "gs://cmip6/CMIP6/CMIP/MOHC/UKESM1-0-LL/piControl/r1i1p1f2/Amon/tas/gn/v20200828/",
+ "time_units_rsdt": "days since 1960-01-16 00:00:00.000000",
+ "zstore_rsdt": "gs://cmip6/CMIP6/CMIP/MOHC/UKESM1-0-LL/piControl/r1i1p1f2/Amon/rsdt/gn/v20190410/",
+ "time_units_rsut": "days since 1960-01-16 00:00:00.000000",
+ "zstore_rsut": "gs://cmip6/CMIP6/CMIP/MOHC/UKESM1-0-LL/piControl/r1i1p1f2/Amon/rsut/gn/v20190715/",
+ "time_units_rlut": "days since 1960-01-16 00:00:00.000000",
+ "zstore_rlut": "gs://cmip6/CMIP6/CMIP/MOHC/UKESM1-0-LL/piControl/r1i1p1f2/Amon/rlut/gn/v20200828/"
+}

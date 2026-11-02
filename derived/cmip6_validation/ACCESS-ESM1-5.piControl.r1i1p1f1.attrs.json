@@ -1,0 +1,20 @@
+{
+ "branch_time_in_parent": "36524.0",
+ "branch_time_in_child": "0.0",
+ "parent_variant_label": "r1i1p1f1",
+ "parent_time_units": "days since 0001-01-01",
+ "parent_experiment_id": "piControl-spinup",
+ "version_id": "v20210316",
+ "tracking_id": "hdl:21.14100/251bba02-7f44-4b8f-b434-404c2accbe1c",
+ "time_units": "hours since 0101-01-16 12:00:00.000000",
+ "calendar": "proleptic_gregorian",
+ "zstore": "gs://cmip6/CMIP6/CMIP/CSIRO/ACCESS-ESM1-5/piControl/r1i1p1f1/Amon/rlut/gn/v20210316/",
+ "time_units_tas": "hours since 0101-01-16 12:00:00.000000",
+ "zstore_tas": "gs://cmip6/CMIP6/CMIP/CSIRO/ACCESS-ESM1-5/piControl/r1i1p1f1/Amon/tas/gn/v20210316/",
+ "time_units_rsdt": "hours since 0101-01-16 12:00:00.000000",
+ "zstore_rsdt": "gs://cmip6/CMIP6/CMIP/CSIRO/ACCESS-ESM1-5/piControl/r1i1p1f1/Amon/rsdt/gn/v20191214/",
+ "time_units_rsut": "hours since 0101-01-16 12:00:00.000000",
+ "zstore_rsut": "gs://cmip6/CMIP6/CMIP/CSIRO/ACCESS-ESM1-5/piControl/r1i1p1f1/Amon/rsut/gn/v20191214/",
+ "time_units_rlut": "hours since 0101-01-16 12:00:00.000000",
+ "zstore_rlut": "gs://cmip6/CMIP6/CMIP/CSIRO/ACCESS-ESM1-5/piControl/r1i1p1f1/Amon/rlut/gn/v20210316/"
+}

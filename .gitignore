@@ -1,0 +1,13 @@
+.venv/
+.venv-acq/
+__pycache__/
+raw_tmp/
+report/
+.DS_Store
+# Copyrighted source documents, used only for transcription (see the CSV headers in reference/)
+reference/*.pdf
+reference/ch7sm.txt
+reference/t7sm5_raw.txt
+# Console logs (local paths); derived/acquire_log.csv is the acquisition record
+derived/*stdout.txt
+outputs/*stdout.txt

@@ -1,0 +1,8 @@
+# Separate venv for scripts/acquire_cmip6_validation.py only (Pangeo gs://cmip6 needs zarr v2)
+dask==2026.6.0
+fsspec==2026.6.0
+gcsfs==2026.6.0
+numpy==2.5.0
+pandas==3.0.3
+xarray==2026.4.0
+zarr==2.18.7

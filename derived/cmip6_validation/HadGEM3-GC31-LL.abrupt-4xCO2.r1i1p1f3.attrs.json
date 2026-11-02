@@ -1,0 +1,20 @@
+{
+ "branch_time_in_parent": "0.0",
+ "branch_time_in_child": "0.0",
+ "parent_variant_label": "r1i1p1f1",
+ "parent_time_units": "days since 1850-01-01-00-00-00",
+ "parent_experiment_id": "piControl",
+ "version_id": "v20190620",
+ "tracking_id": "hdl:21.14100/f9e5b007-e8d2-47ab-9025-9f6863575f44\nhdl:21.14100/c4bf2285-f135-4084-b8b8-54b00d1e9610",
+ "time_units": "days since 1850-01-16 00:00:00.000000",
+ "calendar": "360_day",
+ "zstore": "gs://cmip6/CMIP6/CMIP/MOHC/HadGEM3-GC31-LL/abrupt-4xCO2/r1i1p1f3/Amon/rlut/gn/v20190620/",
+ "time_units_tas": "days since 1850-01-16 00:00:00.000000",
+ "zstore_tas": "gs://cmip6/CMIP6/CMIP/MOHC/HadGEM3-GC31-LL/abrupt-4xCO2/r1i1p1f3/Amon/tas/gn/v20190620/",
+ "time_units_rsdt": "days since 1850-01-16 00:00:00.000000",
+ "zstore_rsdt": "gs://cmip6/CMIP6/CMIP/MOHC/HadGEM3-GC31-LL/abrupt-4xCO2/r1i1p1f3/Amon/rsdt/gn/v20190620/",
+ "time_units_rsut": "days since 1850-01-16 00:00:00.000000",
+ "zstore_rsut": "gs://cmip6/CMIP6/CMIP/MOHC/HadGEM3-GC31-LL/abrupt-4xCO2/r1i1p1f3/Amon/rsut/gn/v20190620/",
+ "time_units_rlut": "days since 1850-01-16 00:00:00.000000",
+ "zstore_rlut": "gs://cmip6/CMIP6/CMIP/MOHC/HadGEM3-GC31-LL/abrupt-4xCO2/r1i1p1f3/Amon/rlut/gn/v20190620/"
+}

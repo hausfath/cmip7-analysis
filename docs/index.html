@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="CMIP7 historical warming and climate sensitivity compared with observations and CMIP6.">
+<title>CMIP7 First Look</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@500;600&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: single reading column (~72ch) for prose; figures and tables break out to a wider measure. */
+:root {
+  --bg: #f6f7f8; --surface: #ffffff; --ink: #14171a; --ink-2: #4a525a; --ink-3: #737b83;
+  --rule: #dde1e5; --accent: #1f63b8; --hot: #b9471c; --hot-bg: #fbe9e1; --cool: #1d6b8f; --cool-bg: #e3f0f6;
+  --nc-bg: #eceef0; --plate: #ffffff;
+  --display: "IBM Plex Sans Condensed", "Arial Narrow", system-ui, sans-serif;
+  --body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #111417; --surface: #181c20; --ink: #e8ebee; --ink-2: #b3bac1; --ink-3: #8a9299;
+  --rule: #2b3137; --accent: #6fa8f0; --hot: #f08a5d; --hot-bg: #3a2219; --cool: #6cc0e0; --cool-bg: #16303b;
+  --nc-bg: #252a2f; --plate: #f4f5f6; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #111417; --surface: #181c20; --ink: #e8ebee; --ink-2: #b3bac1; --ink-3: #8a9299;
+  --rule: #2b3137; --accent: #6fa8f0; --hot: #f08a5d; --hot-bg: #3a2219; --cool: #6cc0e0; --cool-bg: #16303b;
+  --nc-bg: #252a2f; --plate: #f4f5f6; color-scheme: dark }
+body { background: var(--bg); color: var(--ink); font: 16px/1.6 var(--body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+main { max-width: 1080px; margin: 0 auto; padding-block: 40px 72px; display: grid;
+  grid-template-columns: minmax(0, 1fr); gap: 56px; }
+section { display: grid; gap: 18px; min-width: 0; }
+.prose { max-width: 72ch; display: grid; gap: 12px; }
+.prose p, .prose li { margin: 0; }
+h1, h2, h3 { font-family: var(--display); font-weight: 600; text-wrap: balance; margin: 0; line-height: 1.15; }
+h1 { font-size: clamp(2rem, 4.5vw, 3rem); letter-spacing: -0.01em; }
+h2 { font-size: 1.6rem; padding-top: 18px; border-top: 1px solid var(--rule); }
+h3 { font-size: 1.15rem; }
+.eyebrow { font: 500 0.78rem/1 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); }
+.lede { font-size: 1.15rem; color: var(--ink-2); max-width: 66ch; margin: 0; }
+header { display: grid; gap: 14px; }
+.meta { display: flex; flex-wrap: wrap; gap: 8px 22px; font: 0.85rem/1.4 var(--mono); color: var(--ink-3); }
+.findings { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); gap: 14px; }
+.finding { background: var(--surface); border: 1px solid var(--rule); border-radius: 6px; padding: 16px 18px;
+  display: grid; gap: 6px; align-content: start; min-width: 0; }
+.finding .k { font: 600 1.7rem/1.1 var(--display); font-variant-numeric: tabular-nums; }
+.finding p { margin: 0; color: var(--ink-2); font-size: 0.95rem; }
+figure { margin: 0; display: grid; gap: 10px; min-width: 0; }
+figure.narrow { max-width: 680px; }
+.plate { background: var(--plate); border-radius: 6px; padding: 10px; border: 1px solid var(--rule); }
+.plate img { display: block; width: 100%; height: auto; }
+figcaption { font-size: 0.9rem; color: var(--ink-2); max-width: 90ch; }
+.tw { overflow-x: auto; border: 1px solid var(--rule); border-radius: 6px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 0.86rem; }
+th, td { padding: 7px 10px; text-align: left; border-bottom: 1px solid var(--rule); white-space: nowrap; vertical-align: top; }
+th { font: 500 0.74rem/1.3 var(--mono); text-transform: uppercase; letter-spacing: 0.04em; color: var(--ink-3);
+  background: var(--bg); white-space: normal; min-width: 60px; }
+tbody tr:last-child td { border-bottom: 0; }
+table.num td { font-variant-numeric: tabular-nums; }
+.rng { color: var(--ink-3); font-size: 0.8rem; }
+.muted { color: var(--ink-3); }
+.chip { display: inline-block; padding: 1px 7px; border-radius: 10px; font-weight: 500; background: var(--nc-bg); }
+.chip.hi { background: var(--hot-bg); color: var(--hot); }
+.chip.lo { background: var(--cool-bg); color: var(--cool); }
+.tag { font: 500 0.7rem/1 var(--mono); padding: 2px 6px; border-radius: 3px; background: var(--nc-bg); color: var(--ink-2);
+  text-transform: uppercase; letter-spacing: 0.05em; }
+code { font: 0.88em var(--mono); background: var(--nc-bg); padding: 1px 4px; border-radius: 3px; }
+a { color: var(--accent); }
+a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+ul { margin: 0; padding-left: 1.2em; display: grid; gap: 6px; }
+.note { font-size: 0.88rem; color: var(--ink-2); }
+.moved { border: 1px solid var(--accent); border-radius: 4px; padding: 10px 14px; margin-bottom: 20px; font-size: 0.95rem; }
+</style>
+</head>
+<body>
+<main>
+<header>
+  
+  <div class="eyebrow">Working note · ESGF snapshot 2026-10-24</div>
+  <h1>CMIP7 first look: warming and climate sensitivity</h1>
+  <p class="lede">The first 9 CMIP7 models on ESGF, compared with the GMST ensemble over the historical
+  period and with CMIP6 for effective climate sensitivity (ECS) and transient climate response (TCR). The sample is
+  small (6 of 9 models from UK, Canadian and Australian centres), so these are model-by-model results, not an ensemble
+  assessment.</p>
+  <div class="meta"><span>9 models</span><span>2,419 files · 130 GB streamed</span>
+  <span>444 datasets · all CC-BY-4.0</span><span>temperatures in °C vs 1850–1900</span>
+  <span><a href="https://github.com/hausfath/cmip7-analysis">Code and data</a></span></div>
+</header>
+
+<section>
+  <h2>Key results</h2>
+  <div class="findings">
+    <div class="finding"><span class="eyebrow">ECS vs CMIP6 predecessor</span><span class="k">4 of 6 lower</span>
+      <p>4 of 6 CMIP7 models have a lower 150-yr Gregory ECS than their nearest CMIP6 predecessor, with
+      non-overlapping 5–95% regression ranges (5 under the looser test that only the predecessor's value lies
+      outside the CMIP7 range). CMIP7 ECS spans
+      3.59–5.40 °C.</p></div>
+    <div class="finding"><span class="eyebrow">ECS vs AR6</span><span class="k">4 of 6 above likely</span>
+      <p>4 of 6 remain above the AR6 likely range (2.5–4 °C) and 1 above very likely (2–5 °C).
+      For comparison, 40% of CMIP6 models were above 4 °C and 15% above 5 °C.</p></div>
+    <div class="finding"><span class="eyebrow">Historical warming 2012–2021</span><span class="k">4 of 7 too warm</span>
+      <p>The GMST ensemble gives 1.11 °C. 4 of 7 testable models warm significantly
+      more in every published track (CanESM5-1, CanESM6-0-MR, UKCM2-0-LL, UKCM2a-0-HH). UKESM1-3-LL does so in one track only.
+      Removing the control-run drift leaves 4 of 7; removing each member's contemporaneous
+      control-run trend, which also contains centennial variability, gives 3 of 7 (UKCM2-0-LL drops out).</p></div>
+    <div class="finding"><span class="eyebrow">Code validation</span><span class="k">≤ 0.014 °C</span>
+      <p>The same code reproduces published CMIP6 ECS (Zelinka et al. 2020) to ≤ 0.014 °C and TCR (AR6 Table 7.SM.5)
+      to ≤ 0.004 °C on the three validation models.</p></div>
+  </div>
+</section>
+
+<section>
+  <h2>Climate sensitivity</h2>
+  <div class="prose">
+    <p>ECS is the 150-year Gregory estimate from <code>abrupt-4xCO2</code>, with anomalies taken against a 21-yr running
+    mean of the contemporaneous <code>piControl</code> (Zelinka et al. 2020 convention). TCR is the mean of years 61–80 of
+    <code>1pctCO2</code>, with the control drift removed by a linear fit (the ESMValTool convention behind AR6 Table 7.SM.5).
+    Each CMIP7 model is paired with its nearest CMIP6 predecessor by model family. The pairings are our judgement, not
+    an official lineage, and the predecessors are recomputed with the same code so the differences are method-consistent.
+    CanESM5-1 is CanESM5.1-p2 (<a href="https://doi.org/10.5194/gmd-16-6553-2023">Sigmond et al. 2023</a>), whose atmosphere
+    was retuned to an effective climate sensitivity of 4.09 K (their value; 4.14 °C here) and which is
+    also a CMIP6 model (CMIP6 source_id <code>CanESM5-1</code>, release year 2022). Its lower ECS against CanESM5 (5.63 °C) therefore dates from that retuning, not from CMIP7.</p>
+    <p>Across CMIP6, 53 models had a median ECS of 3.72 °C and 52 a median TCR of 1.95 °C
+    (Hausfather et al. 2022 compilation). 3 of 5 CMIP7 models with a 1pctCO2 run have TCR above
+    the AR6 likely range (1.4–2.2 °C).</p>
+  </div>
+  <figure><div class="plate"><img src="figures/fig04_ecs_tcr_vs_cmip6.png" alt="ECS and TCR for each CMIP7 model (blue) with its CMIP6 predecessor (hollow) and the CMIP6 distribution (grey). Shading: AR6 likely and very likely ranges; dashed line: AR6 best estimate." loading="lazy"></div><figcaption>ECS and TCR for each CMIP7 model (blue) with its CMIP6 predecessor (hollow) and the CMIP6 distribution (grey). Shading: AR6 likely and very likely ranges; dashed line: AR6 best estimate.</figcaption></figure>
+  <div class="tw"><table class="num"><thead><tr><th>CMIP7 model</th><th>Member</th><th>ECS (5–95%)</th><th>ECS yr 21–150</th><th>ERF₂ₓ</th><th>λ</th><th>TCR</th><th>CMIP6 predecessor</th><th>ECS</th><th>TCR</th><th>ΔECS</th></tr></thead><tbody><tr><td><b>UKESM1-3-LL</b></td><td>r1i1p1f1</td><td>5.40 <span class='rng'>5.27–5.56</span></td><td>5.93</td><td>3.35</td><td>-0.62</td><td>2.47</td><td>UKESM1-0-LL</td><td>5.36</td><td>2.79</td><td><span class='chip nc'>0.04</span></td></tr><tr><td><b>UKCM2a-0-HH</b></td><td>r1i1p1f1</td><td>4.81 <span class='rng'>4.65–4.99</span></td><td>5.40</td><td>3.24</td><td>-0.67</td><td>–</td><td>HadGEM3-GC31-MM</td><td>5.43</td><td>2.58</td><td><span class='chip lo'>-0.62</span></td></tr><tr><td><b>CanESM6-0-MR</b></td><td>r1i1p1f1</td><td>4.18 <span class='rng'>4.12–4.26</span></td><td>4.42</td><td>3.81</td><td>-0.91</td><td>2.46</td><td>CanESM5</td><td>5.65</td><td>2.74</td><td><span class='chip lo'>-1.47</span></td></tr><tr><td><b>CanESM5-1</b></td><td>r1i1p2f1</td><td>4.14 <span class='rng'>4.09–4.20</span></td><td>4.31</td><td>3.37</td><td>-0.81</td><td>2.15</td><td>CanESM5</td><td>5.63</td><td>2.64</td><td><span class='chip lo'>-1.49</span></td></tr><tr><td><b>ACCESS-ESM1-6</b></td><td>r1i1p1f1</td><td>3.62 <span class='rng'>3.49–3.78</span></td><td>4.31</td><td>2.81</td><td>-0.78</td><td>1.82</td><td>ACCESS-ESM1-5</td><td>3.89</td><td>1.95</td><td><span class='chip nc'>-0.27</span></td></tr><tr><td><b>UKCM2-0-LL</b></td><td>r1i1p1f1</td><td>3.59 <span class='rng'>3.48–3.73</span></td><td>3.88</td><td>2.84</td><td>-0.79</td><td>2.22</td><td>HadGEM3-GC31-LL</td><td>5.55</td><td>2.55</td><td><span class='chip lo'>-1.95</span></td></tr></tbody></table></div>
+  <p class="note">ECS range: fixed-design circular block bootstrap of the regression residuals (10-yr blocks, 2,000
+  resamples); it reflects regression sampling only. "ECS yr 21–150" is the fit excluding the first 20 years; it is larger
+  for 6 of 6 models, the usual pattern-effect curvature. ΔECS is coloured only when the two models' 5–95% ranges do not
+  overlap. The ranges come from one realisation each and exclude realisation-to-realisation spread in ECS, so they
+  understate the true uncertainty of each difference.</p>
+  <figure><div class="plate"><img src="figures/fig05_gregory.png" alt="Gregory plots: annual ΔN against ΔT for years 1–150, CMIP7 (blue) and CMIP6 predecessor (grey)." loading="lazy"></div><figcaption>Gregory plots: annual ΔN against ΔT for years 1–150, CMIP7 (blue) and CMIP6 predecessor (grey).</figcaption></figure>
+  <figure class=narrow><div class="plate"><img src="figures/fig06_ecs_tcr_scatter.png" alt="ECS against TCR for CMIP7 models on the CMIP6 distribution." loading="lazy"></div><figcaption>ECS against TCR for CMIP7 models on the CMIP6 distribution.</figcaption></figure>
+</section>
+
+<section>
+  <h2>Historical warming</h2>
+  <div class="prose">
+    <p>Each member is expressed relative to its own 1850–1900 mean, and each model is summarised by the mean of its
+    members' metrics. Concentration-driven (<code>historical</code>) and emissions-driven (<code>esm-hist</code>) runs are
+    kept separate. Runs end in 2021; 2022–2024 come from each member's own scenario continuation, joined by the parent
+    metadata in the scenario files. The choice of scenario changes ensemble-mean 2015–2024 warming by at most
+    0.021 °C.</p>
+    <p><b>z</b> compares the model ensemble mean with the observations, given observational uncertainty (spread of the
+    10,000-member GMST ensemble) and internal variability (member spread with ≥ 5 members, otherwise the control run).
+    A model counts as warmer than observed if z &gt; 1.645 (one-sided 5%) in every published track. Models consistent with
+    observations in all tracks: ACCESS-ESM1-6, CAS-ESM2-1-CSM. Not tested (one member, no control run): CNRM-ESM2-1e, EC-Earth3-ESM-1-1.
+    For the 1980–2021 trend, 6 of 7 testable models warm faster than observed
+    (0.191 °C per decade).</p>
+  </div>
+  <figure><div class="plate"><img src="figures/fig01_historical_small_multiples.png" alt="Annual tas for each CMIP7 model against the GMST ensemble (black, 5–95% grey)." loading="lazy"></div><figcaption>Annual tas for each CMIP7 model against the GMST ensemble (black, 5–95% grey).</figcaption></figure>
+  <figure><div class="plate"><img src="figures/fig02_historical_metrics.png" alt="2012–2021 warming and 1980–2021 trend, model ensemble mean and member range." loading="lazy"></div><figcaption>2012–2021 warming and 1980–2021 trend, model ensemble mean and member range.</figcaption></figure>
+  <div class="tw"><table class="num"><thead><tr><th>Model</th><th>Track</th><th>n</th><th>2012–2021 (°C, range)</th><th>z</th><th>2015–2024 (°C)</th><th>Trend 1980–2021 (°C/dec)</th><th>z</th><th>Trend 1950–2021</th><th>2012–2021 drift-corr.</th></tr></thead><tbody><tr><td><b>GMST ensemble</b></td><td>obs</td><td>10,000</td><td>1.11 <span class='rng'>1.00–1.26</span></td><td></td><td>1.24</td><td>0.191</td><td></td><td>0.147</td><td></td></tr><tr><td><b>CanESM6-0-MR</b></td><td>Emissions-driven</td><td>19</td><td>1.75 <span class='rng'>1.58–1.93</span></td><td><span class='chip hi'>5.5</span></td><td>1.89</td><td>0.375</td><td><span class='chip hi'>5.4</span></td><td>0.228</td><td>–</td></tr><tr><td><b>CanESM6-0-MR</b></td><td>Concentration-driven</td><td>25</td><td>1.70 <span class='rng'>1.52–1.81</span></td><td><span class='chip hi'>5.5</span></td><td>1.85</td><td>0.377</td><td><span class='chip hi'>9.3</span></td><td>0.223</td><td>1.70</td></tr><tr><td><b>CanESM5-1</b></td><td>Emissions-driven</td><td>25</td><td>1.55 <span class='rng'>1.38–1.72</span></td><td><span class='chip hi'>3.9</span></td><td>1.68</td><td>0.314</td><td><span class='chip hi'>3.5</span></td><td>0.200</td><td>1.56</td></tr><tr><td><b>EC-Earth3-ESM-1-1</b></td><td>Emissions-driven</td><td>1</td><td>1.51 <span class='rng'>1.51–1.51</span></td><td><span class='muted'>n/a</span></td><td>–</td><td>0.406</td><td><span class='muted'>n/a</span></td><td>0.242</td><td>–</td></tr><tr><td><b>UKCM2a-0-HH</b></td><td>Concentration-driven</td><td>3</td><td>1.48 <span class='rng'>1.47–1.49</span></td><td><span class='chip hi'>3.7</span></td><td>1.58</td><td>0.293</td><td><span class='chip hi'>4.0</span></td><td>0.179</td><td>1.63</td></tr><tr><td><b>UKESM1-3-LL</b></td><td>Concentration-driven</td><td>2</td><td>1.44 <span class='rng'>1.35–1.53</span></td><td><span class='chip hi'>1.9</span></td><td>–</td><td>0.383</td><td><span class='chip hi'>3.5</span></td><td>0.191</td><td>1.45</td></tr><tr><td><b>UKCM2-0-LL</b></td><td>Concentration-driven</td><td>5</td><td>1.43 <span class='rng'>1.38–1.49</span></td><td><span class='chip hi'>3.3</span></td><td>–</td><td>0.265</td><td><span class='chip hi'>1.7</span></td><td>0.163</td><td>1.41</td></tr><tr><td><b>UKESM1-3-LL</b></td><td>Emissions-driven</td><td>8</td><td>1.28 <span class='rng'>1.17–1.40</span></td><td><span class='chip nc'>1.4</span></td><td>1.42</td><td>0.352</td><td><span class='chip hi'>4.0</span></td><td>0.180</td><td>1.26</td></tr><tr><td><b>CAS-ESM2-1-CSM</b></td><td>Concentration-driven</td><td>1</td><td>1.13 <span class='rng'>1.13–1.13</span></td><td><span class='chip nc'>0.1</span></td><td>–</td><td>0.275</td><td><span class='chip hi'>2.5</span></td><td>0.150</td><td>0.99</td></tr><tr><td><b>ACCESS-ESM1-6</b></td><td>Emissions-driven</td><td>30</td><td>1.06 <span class='rng'>0.85–1.20</span></td><td><span class='chip nc'>-0.5</span></td><td>–</td><td>0.258</td><td><span class='chip hi'>2.6</span></td><td>0.138</td><td>1.05</td></tr><tr><td><b>ACCESS-ESM1-6</b></td><td>Concentration-driven</td><td>10</td><td>1.05 <span class='rng'>0.84–1.15</span></td><td><span class='chip nc'>-0.5</span></td><td>–</td><td>0.240</td><td><span class='chip nc'>1.5</span></td><td>0.134</td><td>1.04</td></tr><tr><td><b>CNRM-ESM2-1e</b></td><td>Concentration-driven</td><td>1</td><td>0.95 <span class='rng'>0.95–0.95</span></td><td><span class='muted'>n/a</span></td><td>–</td><td>0.157</td><td><span class='muted'>n/a</span></td><td>0.121</td><td>–</td></tr></tbody></table></div>
+  <p class="note">No blending or masking adjustment is applied to model tas (project convention: the GMST ensemble is treated
+  as equivalent to GSAT). Any such adjustment would lower model warming, so it can only shrink the warm biases shown here.
+  <code>historical_metrics.csv</code> lists the fractional reduction in model warming that would make each warm model
+  consistent. The drift-corrected column removes the full-record control-run trend (the drift itself). Removing each member's
+  contemporaneous 172-yr control trend instead, which mixes drift with centennial variability, is a second sensitivity
+  (<code>_driftcorr_seg</code> columns).</p>
+</section>
+
+<section>
+  <h2>Projections</h2>
+  <div class="prose"><p>4 models have scenario runs joined to a published historical parent so far, through 2100 for scen7-h,
+  scen7-m and scen7-vl.
+  Under scen7-h, 2081–2100 warming ranges from 3.89 to 4.65 °C across
+  models and tracks; under scen7-vl, from 1.81 to 2.21 °C. 4 of
+  these 4 warm more than observed over 2012–2021 in at least one track, so they should not be read as a CMIP7
+  projection range.</p></div>
+  <figure><div class="plate"><img src="figures/fig03_projections.png" alt="Ensemble-mean tas by scenario; solid lines concentration-driven, dashed emissions-driven." loading="lazy"></div><figcaption>Ensemble-mean tas by scenario; solid lines concentration-driven, dashed emissions-driven.</figcaption></figure>
+  <div class="tw"><table class="num"><thead><tr><th>Model</th><th>Scenario</th><th>n</th><th>2041–2060 (°C)</th><th>2081–2100 (°C)</th></tr></thead><tbody><tr><td><b>CanESM6-0-MR</b></td><td>esm-scen7-h</td><td>19</td><td>3.01 <span class='rng'>2.90–3.19</span></td><td>4.65 <span class='rng'>4.51–4.78</span></td></tr><tr><td><b>UKESM1-3-LL</b></td><td>esm-scen7-h</td><td>8</td><td>2.72 <span class='rng'>2.59–2.88</span></td><td>4.46 <span class='rng'>4.36–4.58</span></td></tr><tr><td><b>CanESM5-1</b></td><td>esm-scen7-h</td><td>25</td><td>2.65 <span class='rng'>2.57–2.80</span></td><td>3.94 <span class='rng'>3.79–4.11</span></td></tr><tr><td><b>CanESM6-0-MR</b></td><td>esm-scen7-m</td><td>19</td><td>2.94 <span class='rng'>2.82–3.02</span></td><td>4.20 <span class='rng'>4.10–4.36</span></td></tr><tr><td><b>UKESM1-3-LL</b></td><td>esm-scen7-m</td><td>6</td><td>2.51 <span class='rng'>2.41–2.59</span></td><td>3.79 <span class='rng'>3.70–3.95</span></td></tr><tr><td><b>CanESM5-1</b></td><td>esm-scen7-m</td><td>25</td><td>2.60 <span class='rng'>2.52–2.70</span></td><td>3.55 <span class='rng'>3.45–3.65</span></td></tr><tr><td><b>CanESM6-0-MR</b></td><td>esm-scen7-vl</td><td>19</td><td>2.37 <span class='rng'>2.24–2.48</span></td><td>2.21 <span class='rng'>2.07–2.30</span></td></tr><tr><td><b>UKESM1-3-LL</b></td><td>esm-scen7-vl</td><td>8</td><td>2.21 <span class='rng'>2.10–2.26</span></td><td>2.18 <span class='rng'>2.06–2.27</span></td></tr><tr><td><b>CanESM5-1</b></td><td>esm-scen7-vl</td><td>25</td><td>2.14 <span class='rng'>2.07–2.25</span></td><td>1.81 <span class='rng'>1.68–1.91</span></td></tr><tr><td><b>CanESM6-0-MR</b></td><td>scen7-h</td><td>25</td><td>2.95 <span class='rng'>2.82–3.12</span></td><td>4.57 <span class='rng'>4.48–4.72</span></td></tr><tr><td><b>UKCM2a-0-HH</b></td><td>scen7-h</td><td>2</td><td>2.49 <span class='rng'>2.46–2.53</span></td><td>3.89 <span class='rng'>3.89–3.90</span></td></tr><tr><td><b>CanESM6-0-MR</b></td><td>scen7-m</td><td>25</td><td>2.87 <span class='rng'>2.73–3.00</span></td><td>4.20 <span class='rng'>4.07–4.33</span></td></tr><tr><td><b>CanESM6-0-MR</b></td><td>scen7-vl</td><td>25</td><td>2.31 <span class='rng'>2.22–2.43</span></td><td>2.10 <span class='rng'>1.97–2.23</span></td></tr><tr><td><b>UKCM2a-0-HH</b></td><td>scen7-vl</td><td>2</td><td>2.10 <span class='rng'>2.06–2.13</span></td><td>1.85 <span class='rng'>1.84–1.87</span></td></tr></tbody></table></div>
+</section>
+
+<section>
+  <h2>Validation and data checks</h2>
+  <div class="prose">
+    <p>Before any CMIP7 numbers were computed, the code was run on three CMIP6 models with published values. The
+    pre-registered tolerance was ±0.05 °C. ECS matched Zelinka et al. (2020) v2.2 to ≤ 0.014 °C (ERF₂ₓ ≤ 0.003 W m⁻²,
+    λ ≤ 0.001 W m⁻² K⁻¹); across all 7 recomputed CMIP6 runs the largest ECS difference is 0.020 °C. TCR with
+    the linear control fit matched AR6 Table 7.SM.5 to ≤ 0.004 °C and Hausfather et al. (2022) to ≤ 0.027 °C. With a
+    running-mean control instead, TCR was up to 0.067 °C high, so the linear convention is used for TCR.</p>
+  </div>
+  <div class="tw"><table class="num"><thead><tr><th>CMIP6 run</th><th>ECS (ours)</th><th>ECS Zelinka v2.2</th><th>Δ</th><th>ERF₂ₓ</th><th>Δ</th><th>TCR linear</th><th>TCR AR6</th><th>Δ</th><th>TCR rm21</th><th>Δ vs H22</th></tr></thead><tbody><tr><td><b>CanESM5</b> r1i1p1f1 <span class='tag'>validation</span></td><td>5.653</td><td>5.639</td><td>0.014</td><td>3.678</td><td>0.003</td><td>2.739</td><td>2.74</td><td>-0.001</td><td>2.775</td><td>0.063</td></tr><tr><td><b>UKESM1-0-LL</b> r1i1p1f2 <span class='tag'>validation</span></td><td>5.358</td><td>5.359</td><td>-0.001</td><td>3.607</td><td>-0.001</td><td>2.786</td><td>2.79</td><td>-0.004</td><td>2.836</td><td>0.067</td></tr><tr><td><b>ACCESS-ESM1-5</b> r1i1p1f1 <span class='tag'>validation</span></td><td>3.889</td><td>3.884</td><td>0.005</td><td>2.830</td><td>0.000</td><td>1.947</td><td>1.95</td><td>-0.003</td><td>2.006</td><td>0.035</td></tr><tr><td><b>CanESM5</b> r1i1p2f1</td><td>5.633</td><td>5.616</td><td>0.017</td><td>3.640</td><td>0.000</td><td>2.640</td><td>–</td><td>–</td><td>2.622</td><td>–</td></tr><tr><td><b>HadGEM3-GC31-LL</b> r1i1p1f3</td><td>5.545</td><td>5.546</td><td>-0.000</td><td>3.488</td><td>0.001</td><td>2.552</td><td>2.55</td><td>0.002</td><td>2.528</td><td>0.038</td></tr><tr><td><b>HadGEM3-GC31-MM</b> r1i1p1f3</td><td>5.433</td><td>5.440</td><td>-0.007</td><td>3.569</td><td>0.002</td><td>2.579</td><td>2.58</td><td>-0.001</td><td>2.649</td><td>0.052</td></tr><tr><td><b>CNRM-ESM2-1</b> r1i1p1f2</td><td>4.774</td><td>4.794</td><td>-0.020</td><td>2.954</td><td>-0.016</td><td>1.853</td><td>1.86</td><td>-0.007</td><td>1.884</td><td>0.051</td></tr></tbody></table></div>
+  <div class="prose"><ul>
+    <li>2,411 of 2,419 files matched their ESGF sha256 checksum. The other 8 (CanESM5-1 piControl)
+    were rewritten on the CCCma node after indexing; they are complete and readable but cannot be checksum-verified, so
+    CanESM5-1's ECS rests on the server copy.</li>
+    <li>Scenario runs are joined to their historical parent by metadata, not variant label: some UKESM1-3-LL esm-scen7 f1
+    members branch from f2 esm-hist members. Runs whose declared parent is unpublished are not used
+    (<code>splice_check.csv</code>).</li>
+    <li>Version tags: CanESM5-1 datasets carry <code>v20190429</code>, but their global attributes identify CMIP7 output
+    created in 2026. UKESM1-3-LL <code>historical</code> is forcing variant f2, while its control and idealised runs are f1.</li>
+    <li>Some datasets in the ESGF inventory are daily-maximum or daily-minimum brandings (<code>tmaxavg</code>,
+    <code>tmax</code>) rather than means, and are excluded. This removes an apparent CNRM-ESM2-1e <code>esm-hist</code> and
+    CAS-ESM2-1-CSM <code>scen7-vl</code>.</li>
+  </ul></div>
+  <div class="tw"><table class="num"><thead><tr><th>Model</th><th>Institution</th><th>historical</th><th>esm-hist</th><th>scen7 h/m/vl</th><th>esm-scen7 h/m/vl</th><th>abrupt-4xCO2 radiation</th><th>1pctCO2</th></tr></thead><tbody><tr><td><b>ACCESS-ESM1-6</b></td><td>ACCESS-Consortium</td><td>10</td><td>30</td><td>–/–/–</td><td>–/–/–</td><td>✓</td><td>✓</td></tr><tr><td><b>CAS-ESM2-1-CSM</b></td><td>CAS</td><td>1</td><td>–</td><td>–/–/–</td><td>–/–/–</td><td>–</td><td>–</td></tr><tr><td><b>CNRM-ESM2-1e</b></td><td>CNRM-CERFACS</td><td>1</td><td>–</td><td>–/–/–</td><td>–/–/–</td><td>–</td><td>–</td></tr><tr><td><b>CanESM5-1</b></td><td>CCCma</td><td>–</td><td>25</td><td>–/–/–</td><td>25/25/25</td><td>✓</td><td>✓</td></tr><tr><td><b>CanESM6-0-MR</b></td><td>CCCma</td><td>25</td><td>19</td><td>25/25/25</td><td>25/25/25</td><td>✓</td><td>✓</td></tr><tr><td><b>EC-Earth3-ESM-1-1</b></td><td>EC-Earth-Consortium</td><td>–</td><td>1</td><td>–/–/–</td><td>1/–/1</td><td>–</td><td>–</td></tr><tr><td><b>UKCM2-0-LL</b></td><td>UKNCSP</td><td>5</td><td>–</td><td>–/–/–</td><td>–/–/–</td><td>✓</td><td>✓</td></tr><tr><td><b>UKCM2a-0-HH</b></td><td>UKNCSP</td><td>3</td><td>–</td><td>2/–/2</td><td>–/–/–</td><td>✓</td><td>–</td></tr><tr><td><b>UKESM1-3-LL</b></td><td>UKNCSP</td><td>2</td><td>8</td><td>1/–/–</td><td>8/6/8</td><td>✓</td><td>✓</td></tr></tbody></table></div>
+</section>
+
+<section>
+  <h2>Caveats</h2>
+  <div class="prose"><ul>
+    <li>The sample is early and non-random. Counts and ranges here describe these 9 models, not CMIP7.</li>
+    <li>150-yr Gregory ECS is an effective sensitivity and understates the long-run equilibrium for models with strong
+    pattern effects.</li>
+    <li>CMIP7 forcing differs from CMIP6, so CMIP6→CMIP7 differences in historical warming mix model and forcing changes.
+    ECS and TCR come from idealised CO₂ runs and are not affected.</li>
+    <li>Emissions-driven runs simulate their own CO₂, so differences between their warming and that of the
+    concentration-driven runs partly reflect CO₂.</li>
+    <li>The consistency test assumes realistic model internal variability. For models with 2–3 members it relies on the
+    control run.</li>
+  </ul></div>
+</section>
+
+<section>
+  <h2>Sources</h2>
+  <div class="prose note"><ul>
+    <li>CMIP7 output via ESGF, per the <a href="https://wcrp-cmip.github.io/cmip7-guidance/docs/CMIP7/Guidance_for_users/">CMIP7 user guidance</a>.
+    Dataset IDs, versions and tracking IDs: <code>outputs/cmip7_dataset_table.csv</code>.</li>
+    <li>Hausfather, Marvel, Schmidt, Nielsen-Gammon &amp; Zelinka (2022), <a href="https://doi.org/10.1038/d41586-022-01192-2">Nature 605, 26–29</a>;
+    data <a href="https://zenodo.org/records/6476375">Zenodo 6476375</a>.</li>
+    <li>Zelinka et al. (2020), GRL; values v2.2 from <a href="https://github.com/mzelinka/cmip56_forcing_feedback_ecs">github.com/mzelinka/cmip56_forcing_feedback_ecs</a>.</li>
+    <li>Sigmond et al. (2023), <a href="https://doi.org/10.5194/gmd-16-6553-2023">GMD 16, 6553</a>.</li>
+    <li>IPCC AR6 WGI Chapter 7 and Table 7.SM.5; SPM A.1.2 for 2011–2020 warming.</li>
+    <li>CMIP6 model output from the Pangeo <code>gs://cmip6</code> archive.</li>
+  </ul>
+  <p>Full methods, parameter choices and sensitivity tests: <a href="https://github.com/hausfath/cmip7-analysis/blob/main/METHODS.md">METHODS.md</a>.
+  Code, derived data and the pipeline to reproduce every number and figure: <a href="https://github.com/hausfath/cmip7-analysis">https://github.com/hausfath/cmip7-analysis</a>.</p></div>
+</section>
+</main>
+</body>
+</html>

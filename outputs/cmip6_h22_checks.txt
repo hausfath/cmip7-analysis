@@ -1,0 +1,18 @@
+SSP2-4.5: max |37-model mean − MMM '50th Percentile'| 2015–2099 = 6.0e-07
+SSP1-2.6: max |37-model mean − MMM '50th Percentile'| 2015–2099 = 5.9e-07
+SSP3-7.0: max |37-model mean − MMM '50th Percentile'| 2015–2099 = 6.6e-07
+SSP5-8.5: max |37-model mean − MMM '50th Percentile'| 2015–2099 = 5.8e-02
+Interannual noise 1850–1950: 0.054–0.128 °C across models (CanESM5 0.080, MIROC6 0.115; a ~50-member mean would be ~0.012)
+H22 1850–1899 mean, max |·| over models = 1.4e-10
+Re-baselining 1850–1899 → 1850–1900 shifts models by -0.0033 to +0.0074 °C
+splice spread across SSPs, dT_2012_2021: max 0.1497 (IPSL-CM6A-LR), median 0.0674
+splice spread across SSPs, dT_2015_2024: max 0.1658 (CESM2-WACCM), median 0.0943
+splice spread across SSPs, dT_2011_2020: max 0.1461 (IPSL-CM6A-LR), median 0.0585
+splice spread across SSPs, trend_1980_2021: max 0.0414 (IPSL-CM6A-LR), median 0.0202
+splice spread across SSPs, trend_1950_2021: max 0.0154 (IPSL-CM6A-LR), median 0.0071
+splice spread across SSPs, trend_1980_2024: max 0.0404 (CESM2-WACCM), median 0.0216
+2014→2015 jump (SSP2-4.5): median +0.051, range -0.489 to +0.397 °C; |z| > 2 for 3 of 37 (≈1.7 expected by chance)
+Missing SSPs: CIESM SSP3-7.0; CMCC-ESM2 SSP1-2.6; FIO-ESM-2-0 SSP3-7.0; GFDL-CM4 SSP1-2.6; GFDL-CM4 SSP3-7.0; HadGEM3-GC31-LL SSP3-7.0; IITM-ESM SSP1-2.6; IITM-ESM SSP3-7.0; NESM3 SSP3-7.0; TaiESM1 SSP1-2.6
+dT_2011_2020: CMIP6 median 1.085, 5–95% 0.823–1.683; obs median 1.088
+dT_2012_2021: CMIP6 median 1.104, 5–95% 0.853–1.706; obs median 1.113
+trend_1980_2021: CMIP6 median 0.241, 5–95% 0.165–0.411; obs median 0.191

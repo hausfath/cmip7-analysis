@@ -1,0 +1,20 @@
+{
+ "branch_time_in_parent": "0.0",
+ "branch_time_in_child": "0.0",
+ "parent_variant_label": "r1i1p1f1",
+ "parent_time_units": "days since 0101-01-01",
+ "parent_experiment_id": "piControl",
+ "version_id": "v20191115",
+ "tracking_id": "hdl:21.14100/c739da2a-d563-4705-8d46-29fcb6c940ce",
+ "time_units": "hours since 0101-01-16 12:00:00.000000",
+ "calendar": "proleptic_gregorian",
+ "zstore": "gs://cmip6/CMIP6/CMIP/CSIRO/ACCESS-ESM1-5/abrupt-4xCO2/r1i1p1f1/Amon/rlut/gn/v20191115/",
+ "time_units_tas": "hours since 0101-01-16 12:00:00.000000",
+ "zstore_tas": "gs://cmip6/CMIP6/CMIP/CSIRO/ACCESS-ESM1-5/abrupt-4xCO2/r1i1p1f1/Amon/tas/gn/v20191115/",
+ "time_units_rsdt": "hours since 0101-01-16 12:00:00.000000",
+ "zstore_rsdt": "gs://cmip6/CMIP6/CMIP/CSIRO/ACCESS-ESM1-5/abrupt-4xCO2/r1i1p1f1/Amon/rsdt/gn/v20191115/",
+ "time_units_rsut": "hours since 0101-01-16 12:00:00.000000",
+ "zstore_rsut": "gs://cmip6/CMIP6/CMIP/CSIRO/ACCESS-ESM1-5/abrupt-4xCO2/r1i1p1f1/Amon/rsut/gn/v20191115/",
+ "time_units_rlut": "hours since 0101-01-16 12:00:00.000000",
+ "zstore_rlut": "gs://cmip6/CMIP6/CMIP/CSIRO/ACCESS-ESM1-5/abrupt-4xCO2/r1i1p1f1/Amon/rlut/gn/v20191115/"
+}

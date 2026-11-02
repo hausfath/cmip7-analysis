@@ -1,0 +1,14 @@
+{
+ "branch_time_in_parent": "1223115.0",
+ "branch_time_in_child": "0.0",
+ "parent_variant_label": "r1i1p1f1",
+ "parent_time_units": "days since 1850-01-01 0:0:0.0",
+ "parent_experiment_id": "piControl",
+ "version_id": "v20190429",
+ "tracking_id": "hdl:21.14100/3beb38c2-d30a-4ed6-8198-b7b5182cab28",
+ "time_units": "hours since 1850-01-16 12:00:00.000000",
+ "calendar": "noleap",
+ "zstore": "gs://cmip6/CMIP6/CMIP/CCCma/CanESM5/1pctCO2/r1i1p1f1/Amon/tas/gn/v20190429/",
+ "time_units_tas": "hours since 1850-01-16 12:00:00.000000",
+ "zstore_tas": "gs://cmip6/CMIP6/CMIP/CCCma/CanESM5/1pctCO2/r1i1p1f1/Amon/tas/gn/v20190429/"
+}

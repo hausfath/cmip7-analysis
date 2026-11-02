@@ -1,0 +1,19 @@
+{
+ "branch_time_in_parent": "36524.0",
+ "branch_time_in_child": "0.0",
+ "parent_variant_label": "r1i1p1f2",
+ "parent_time_units": "days since 1850-01-01 00:00:00",
+ "parent_experiment_id": "piControl-spinup",
+ "version_id": "v20181115",
+ "tracking_id": "hdl:21.14100/bb9eeb57-b287-4847-a144-b6bb98d1b39b",
+ "time_units": "days since 1850-01-16 00:00:00.000000",
+ "time_units_tas": "days since 1850-01-16 00:00:00.000000",
+ "calendar": "360_day",
+ "zstore_tas": "gs://cmip6/CMIP6/CMIP/CNRM-CERFACS/CNRM-ESM2-1/piControl/r1i1p1f2/Amon/tas/gr/v20181115/",
+ "time_units_rsdt": "days since 1850-01-16 00:00:00.000000",
+ "zstore_rsdt": "gs://cmip6/CMIP6/CMIP/CNRM-CERFACS/CNRM-ESM2-1/piControl/r1i1p1f2/Amon/rsdt/gr/v20181115/",
+ "time_units_rsut": "days since 1850-01-16 00:00:00.000000",
+ "zstore_rsut": "gs://cmip6/CMIP6/CMIP/CNRM-CERFACS/CNRM-ESM2-1/piControl/r1i1p1f2/Amon/rsut/gr/v20181115/",
+ "time_units_rlut": "days since 1850-01-16 00:00:00.000000",
+ "zstore_rlut": "gs://cmip6/CMIP6/CMIP/CNRM-CERFACS/CNRM-ESM2-1/piControl/r1i1p1f2/Amon/rlut/gr/v20181115/"
+}

@@ -1,0 +1,20 @@
+{
+ "branch_time_in_parent": "1350500.0",
+ "branch_time_in_child": "1350500.0",
+ "parent_variant_label": "r1i1p2f1",
+ "parent_time_units": "days since 1850-01-01 0:0:0.0",
+ "parent_experiment_id": "piControl-spinup",
+ "version_id": "v20190429",
+ "tracking_id": "hdl:21.14100/99c54d9c-992f-46d4-adad-f710b4bc1b41\nhdl:21.14100/5861520d-f85d-45a6-9a37-4e07a7dfc8c8\nhdl:21.14100/b87e8c69-971c-469f-afe3-e20aa3ddab54\nhdl:21.14100/56d78854-5d06-4ab8-ba33-50ffeee2db5f\nhdl:21.14100/30b4bc35-dd8f-42b6-ad28-b948a66cf096\nhdl:21.14100/47becae4-7f95-4fb8-9a9f-8ed317f0a840",
+ "time_units": "hours since 5550-01-16 12:00:00.000000",
+ "calendar": "noleap",
+ "zstore": "gs://cmip6/CMIP6/CMIP/CCCma/CanESM5/piControl/r1i1p2f1/Amon/rlut/gn/v20190429/",
+ "time_units_tas": "hours since 5550-01-16 12:00:00.000000",
+ "zstore_tas": "gs://cmip6/CMIP6/CMIP/CCCma/CanESM5/piControl/r1i1p2f1/Amon/tas/gn/v20190429/",
+ "time_units_rsdt": "hours since 5550-01-16 12:00:00.000000",
+ "zstore_rsdt": "gs://cmip6/CMIP6/CMIP/CCCma/CanESM5/piControl/r1i1p2f1/Amon/rsdt/gn/v20190429/",
+ "time_units_rsut": "hours since 5550-01-16 12:00:00.000000",
+ "zstore_rsut": "gs://cmip6/CMIP6/CMIP/CCCma/CanESM5/piControl/r1i1p2f1/Amon/rsut/gn/v20190429/",
+ "time_units_rlut": "hours since 5550-01-16 12:00:00.000000",
+ "zstore_rlut": "gs://cmip6/CMIP6/CMIP/CCCma/CanESM5/piControl/r1i1p2f1/Amon/rlut/gn/v20190429/"
+}

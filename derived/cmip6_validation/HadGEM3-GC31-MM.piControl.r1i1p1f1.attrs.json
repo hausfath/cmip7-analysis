@@ -1,0 +1,19 @@
+{
+ "branch_time_in_parent": "127080.0",
+ "branch_time_in_child": "0.0",
+ "parent_variant_label": "r1i1p1f1",
+ "parent_time_units": "days since 1850-01-01-00-00-00",
+ "parent_experiment_id": "piControl-spinup",
+ "version_id": "v20190920",
+ "tracking_id": "hdl:21.14100/d55406e0-9d39-4a2d-afa6-8bed73c1050f\nhdl:21.14100/1588dcdf-0ceb-4e92-a6bb-19f0862f304d\nhdl:21.14100/ab5d7ae1-814c-4cfd-8252-c0d4c2b1dad0\nhdl:21.14100/4c27dd95-332b-478c-b25d-349553625515\nhdl:21.14100/94832b4e-2a7c-4038-85c3-a23e6c271733\nhdl:21.14100/60116918-f04a-4539-b49a-96112c79581c\nhdl:21.14100/a1e0cdf4-364d-4982-bb46-748742befef7\nhdl:21.14100/79fb1ed4-3619-47d6-aed9-82aa8e26859d\nhdl:21.14100/417f785b-bf30-4f20-b677-69699543120a\nhdl:21.14100/044da565-8de7-49b2-80e9-a63237f990b3\nhdl:21.14100/ca6309bb-f2c8-4192-8a8c-27e27c788f94\nhdl:21.14100/1cd63c5d-daa0-4479-a535-73f79b603024\nhdl:21.14100/91a93a74-b4ea-490e-8fe9-bb16ca4fad71\nhdl:21.14100/1f838cd0-cdb8-4491-895b-4d3445c30a21\nhdl:21.14100/1b0bdb16-c89d-4eda-87ec-2a73fd6bf418\nhdl:21.14100/272f15c4-befe-4e27-ba68-c2ee20f3ae27\nhdl:21.14100/0adecff3-2f56-45c4-ada7-8b029aaba3da\nhdl:21.14100/32d95402-012e-4929-a23c-a2ca057e0206\nhdl:21.14100/641f49d8-6259-4099-9748-0d6ecead9b89\nhdl:21.14100/4ba2951d-39a2-4b1f-86cb-68decbef1f28\nhdl:21.14100/cf6ddfde-9327-4bcc-9725-4b93593a168f\nhdl:21.14100/65d0234c-3fdf-4667-8479-2ca7f8299942\nhdl:21.14100/190ec889-f2c8-4359-b809-07ccc3cf8cfa\nhdl:21.14100/c00e0b83-fb29-4a42-9ca9-7c061db28176\nhdl:21.14100/ee6a1637-772e-42be-9b28-0fd6b610088d",
+ "time_units": "days since 1850-01-16 00:00:00.000000",
+ "time_units_tas": "days since 1850-01-16 00:00:00.000000",
+ "calendar": "360_day",
+ "zstore_tas": "gs://cmip6/CMIP6/CMIP/MOHC/HadGEM3-GC31-MM/piControl/r1i1p1f1/Amon/tas/gn/v20190920/",
+ "time_units_rsdt": "days since 1850-01-16 00:00:00.000000",
+ "zstore_rsdt": "gs://cmip6/CMIP6/CMIP/MOHC/HadGEM3-GC31-MM/piControl/r1i1p1f1/Amon/rsdt/gn/v20170831/",
+ "time_units_rsut": "days since 1850-01-16 00:00:00.000000",
+ "zstore_rsut": "gs://cmip6/CMIP6/CMIP/MOHC/HadGEM3-GC31-MM/piControl/r1i1p1f1/Amon/rsut/gn/v20190920/",
+ "time_units_rlut": "days since 1850-01-16 00:00:00.000000",
+ "zstore_rlut": "gs://cmip6/CMIP6/CMIP/MOHC/HadGEM3-GC31-MM/piControl/r1i1p1f1/Amon/rlut/gn/v20190920/"
+}
