@@ -67,18 +67,41 @@ class StaleIndex(Exception):
     """Server file is complete (matches its own Content-Length) but differs from the index."""
 
 
+def _fetch(url, dest, max_resumes=20):
+    """Stream url to dest. If the connection drops and the server honours HTTP Range (206), resume
+    from the bytes already written rather than restarting; sha256 is still checked on the whole file.
+    Returns the full Content-Length the server reports."""
+    clen, got = -1, 0
+    for _ in range(max_resumes + 1):
+        hdr = {"Range": f"bytes={got}-"} if got else {}
+        try:
+            with requests.get(url, stream=True, timeout=(30, 300), headers=hdr) as r:
+                r.raise_for_status()
+                if got and r.status_code != 206:      # no range support: start over
+                    got = 0
+                if not got:
+                    clen = int(r.headers.get("content-length", -1))
+                with open(dest, "ab" if got else "wb") as f:
+                    for ch in r.iter_content(1 << 22):
+                        f.write(ch)
+            return clen
+        except (requests.exceptions.ChunkedEncodingError, requests.exceptions.ConnectionError,
+                requests.exceptions.Timeout):
+            new = dest.stat().st_size if dest.exists() else 0
+            if new <= got:          # no progress on this attempt
+                raise
+            got = new
+            time.sleep(5)
+    raise IOError(f"gave up after {max_resumes} resumes at {got} bytes")
+
+
 def download(urls, dest, size):
     last = None
     for attempt in range(4):
         for url in urls:
             try:
                 with host_sem(url):
-                    with requests.get(url, stream=True, timeout=(30, 300)) as r:
-                        r.raise_for_status()
-                        clen = int(r.headers.get("content-length", -1))
-                        with open(dest, "wb") as f:
-                            for ch in r.iter_content(1 << 22):
-                                f.write(ch)
+                    clen = _fetch(url, dest)
                 got = dest.stat().st_size
                 if size and got != int(size):
                     if ACCEPT_STALE and got == clen:

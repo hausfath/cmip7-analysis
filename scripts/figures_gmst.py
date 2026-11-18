@@ -20,7 +20,7 @@ from matplotlib.patches import Patch  # noqa: E402
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 GD, OUT, FIG = ROOT / "derived" / "gmst", ROOT / "outputs", ROOT / "figures"
 MODELS = ["CanESM6-0-MR", "CanESM5-1", "UKESM1-3-LL", "UKCM2-0-LL", "UKCM2a-0-HH", "ACCESS-ESM1-6",
-          "CAS-ESM2-1-CSM", "EC-Earth3-ESM-1-1", "CNRM-ESM2-1e"]
+          "CAS-ESM2-1-CSM", "EC-Earth3-ESM-1-1", "CNRM-ESM2-1e", "KACE-2-0-G"]
 OBS_END = 2025
 
 
@@ -30,7 +30,12 @@ def load(model, exp):
 
 
 def fig01(obs, hm):
-    fig, axs = plt.subplots(3, 3, figsize=(S.WIDTH, 150 * S.MM), sharex=True, sharey=True)
+    nr = -(-len(MODELS) // 3)
+    fig, axs = plt.subplots(nr, 3, figsize=(S.WIDTH, (22 + 40 * nr) * S.MM), sharex=True, sharey=True)
+    for ax in axs.flat[len(MODELS):]:
+        ax.set_visible(False)
+    for ax in axs[-2, len(MODELS) - 3 * (nr - 1):] if len(MODELS) % 3 else []:
+        ax.tick_params(labelbottom=True)
     for ax, m in zip(axs.flat, MODELS):
         ax.fill_between(obs.index, obs.p05, obs.p95, color=S.OBS_BAND, lw=0, alpha=0.7)
         ax.plot(obs.index, obs["median"], color=S.OBS, lw=0.9)
@@ -59,8 +64,16 @@ def fig01(obs, hm):
                Line2D([], [], color=S.TRACK_COLOR["historical"], lw=1.4, label="Concentration-driven (historical) mean"),
                Line2D([], [], color=S.TRACK_COLOR["esm-hist"], lw=1.4, label="Emissions-driven (esm-hist) mean"),
                Patch(color="#999", alpha=0.35, label="Member range")]
-    fig.legend(handles=handles, loc="lower center", ncol=3, frameon=False, bbox_to_anchor=(0.5, -0.045))
-    fig.tight_layout(rect=(0, 0.02, 1, 0.9))
+    spare = axs.flat[len(MODELS):]
+    if len(spare):
+        # legend in the empty panel slots of the last row
+        fig.tight_layout(rect=(0, 0, 1, 0.9))
+        b0, b1 = spare[0].get_position(), spare[-1].get_position()
+        fig.legend(handles=handles, loc="center", ncol=1, frameon=False,
+                   bbox_to_anchor=(b0.x0, b0.y0, b1.x1 - b0.x0, b0.height), bbox_transform=fig.transFigure)
+    else:
+        fig.legend(handles=handles, loc="lower center", ncol=3, frameon=False, bbox_to_anchor=(0.5, -0.045))
+        fig.tight_layout(rect=(0, 0.02, 1, 0.9))
     S.titles(fig, "CMIP7 models published so far vs observed global temperature",
              "Annual global surface air temperature (tas), °C relative to 1850–1900. Panel text: 2012–2021 mean "
              "warming.\n2022–2024 from each member's own scenario continuation (scen7-m preferred, else h, else vl) where published.", gap=0.04)

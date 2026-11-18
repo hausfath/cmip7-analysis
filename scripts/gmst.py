@@ -39,7 +39,7 @@ OUT = ROOT / "outputs"
 BASE = (1850, 1900)
 HIST_END = 2021
 MODELS = ["CanESM6-0-MR", "CanESM5-1", "UKESM1-3-LL", "UKCM2-0-LL", "UKCM2a-0-HH", "ACCESS-ESM1-6",
-          "CAS-ESM2-1-CSM", "EC-Earth3-ESM-1-1", "CNRM-ESM2-1e"]
+          "CAS-ESM2-1-CSM", "EC-Earth3-ESM-1-1", "CNRM-ESM2-1e", "KACE-2-0-G"]
 SCEN = {"historical": ["scen7-m", "scen7-h", "scen7-vl"],              # splice preference order
         "esm-hist": ["esm-scen7-m", "esm-scen7-h", "esm-scen7-vl"]}
 CONTROL = {"historical": "piControl", "esm-hist": "esm-piControl"}

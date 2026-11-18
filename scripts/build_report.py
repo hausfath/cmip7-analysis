@@ -15,7 +15,8 @@ OUT, FIG = ROOT / "outputs", ROOT / "figures"
 REP = ROOT / ("report" if ARTIFACT else "docs")
 REPO = "https://github.com/hausfath/cmip7-analysis"
 SITE = "https://hausfath.github.io/cmip7-analysis/"
-SNAPSHOT = "2026-10-24"
+# snapshot date = date of the newest dated manifest
+SNAPSHOT = max(p.stem.removeprefix("manifest_") for p in (ROOT / "inventory").glob("manifest_20*.csv"))
 AR6_ECS_LIK, AR6_ECS_VL, AR6_TCR_LIK, AR6_TCR_VL = (2.5, 4.0), (2.0, 5.0), (1.4, 2.2), (1.2, 2.4)
 TRACK = {"historical": "Concentration-driven", "esm-hist": "Emissions-driven"}
 
@@ -56,8 +57,18 @@ def main():
     ref = ref[~ref.copy_of_other_model]
 
     n_models = man.source_id.nunique()
+    used = set(hm[hm.track != "obs"].model) | set(lp.model)
+    n_used = len(used)
+    pending = sorted(set(man.source_id) - used)
+    pend_txt = ""
+    if pending:
+        pend_txt = (f" {', '.join(pending)} {'has' if len(pending) == 1 else 'have'} only scenario runs whose declared "
+                    f"parent historical run is not yet published, so {'it is' if len(pending) == 1 else 'they are'} "
+                    "listed below but not analysed.")
     n_files, gb = len(man), man["size"].sum() / 1e9
     n_stale = int(dst.files_ok_stale_index.sum())
+    st = dst[dst.files_ok_stale_index > 0].groupby(["source_id", "experiment_id"]).files_ok_stale_index.sum()
+    stale_txt = "; ".join(f"{s} {e}: {n}" for (s, e), n in st.items())
 
     # ---- validation
     val = c6[c6.validation_set]
@@ -259,11 +270,11 @@ ul {{ margin: 0; padding-left: 1.2em; display: grid; gap: 6px; }}
   {moved}
   <div class="eyebrow">Working note · ESGF snapshot {SNAPSHOT}</div>
   <h1>CMIP7 first look: warming and climate sensitivity</h1>
-  <p class="lede">The first {n_models} CMIP7 models on ESGF, compared with the GSAT ensemble over the historical
+  <p class="lede">The first {n_used} CMIP7 models on ESGF with usable output, compared with the GSAT ensemble over the historical
   period and with CMIP6 for effective climate sensitivity (ECS) and transient climate response (TCR). The sample is
-  small ({n_ukcaau} of {n_models} models from UK, Canadian and Australian centres), so these are model-by-model results, not an ensemble
-  assessment.</p>
-  <div class="meta"><span>{n_models} models</span><span>{n_files:,} files · {gb:.0f} GB streamed</span>
+  small ({n_ukcaau} of {n_models} models on ESGF are from UK, Canadian and Australian centres), so these are model-by-model results, not an ensemble
+  assessment.{esc(pend_txt)}</p>
+  <div class="meta"><span>{n_used} models analysed ({n_models} on ESGF)</span><span>{n_files:,} files · {gb:.0f} GB streamed</span>
   <span>{len(dst)} datasets · all CC-BY-4.0</span><span>temperatures in °C vs 1850–1900</span>
   <span><a href="{REPO}">Code and data</a></span></div>
 </header>
@@ -327,7 +338,7 @@ ul {{ margin: 0; padding-left: 1.2em; display: grid; gap: 6px; }}
     <p><b>z</b> compares the model ensemble mean with the observations, given observational uncertainty (spread of the
     10,000-member GSAT ensemble) and internal variability (member spread with ≥ 5 members, otherwise the control run).
     A model counts as warmer than observed if z &gt; 1.645 (one-sided 5%) in every published track. Models consistent with
-    observations in all tracks: {esc(', '.join(cons))}. Not tested (one member, no control run): {esc(', '.join(untested))}.
+    observations in all tracks: {esc(', '.join(cons))}. Not tested (fewer than 5 members and no control run): {esc(', '.join(untested))}.
     For the 1980–2021 trend, {n_trend_hot} of {tt.ngroups} testable models warm faster than observed
     ({f2(obs.trend_1980_2021, 3)} °C per decade).</p>
   </div>
@@ -365,17 +376,17 @@ ul {{ margin: 0; padding-left: 1.2em; display: grid; gap: 6px; }}
   </div>
   {val_tab}
   <div class="prose"><ul>
-    <li>{n_files - n_stale:,} of {n_files:,} files matched their ESGF sha256 checksum. The other {n_stale} (CanESM5-1 piControl)
-    were rewritten on the CCCma node after indexing; they are complete and readable but cannot be checksum-verified, so
-    CanESM5-1's ECS rests on the server copy.</li>
+    <li>{n_files - n_stale:,} of {n_files:,} files matched their ESGF sha256 checksum. The other {n_stale} ({esc(stale_txt)})
+    differ from the index but match the size the data node serves, consistent with files rewritten after indexing. They are
+    complete and readable but cannot be checksum-verified, so CanESM5-1's ECS rests on the server copy of its control.</li>
     <li>Scenario runs are joined to their historical parent by metadata, not variant label: some UKESM1-3-LL esm-scen7 f1
     members branch from f2 esm-hist members. Runs whose declared parent is unpublished are not used
     (<code>splice_check.csv</code>).</li>
     <li>Version tags: CanESM5-1 datasets carry <code>v20190429</code>, but their global attributes identify CMIP7 output
     created in 2026. UKESM1-3-LL <code>historical</code> is forcing variant f2, while its control and idealised runs are f1.</li>
     <li>Some datasets in the ESGF inventory are daily-maximum or daily-minimum brandings (<code>tmaxavg</code>,
-    <code>tmax</code>) rather than means, and are excluded. This removes an apparent CNRM-ESM2-1e <code>esm-hist</code> and
-    CAS-ESM2-1-CSM <code>scen7-vl</code>.</li>
+    <code>tmax</code>) rather than means, and are excluded. This removes an apparent CNRM-ESM2-1e <code>esm-hist</code>.
+    CAS-ESM2-1-CSM <code>scen7-vl</code> tas is published only as 3-hourly output, not as monthly means, so it is not used.</li>
   </ul></div>
   {hold_tab}
 </section>
@@ -383,7 +394,7 @@ ul {{ margin: 0; padding-left: 1.2em; display: grid; gap: 6px; }}
 <section>
   <h2>Caveats</h2>
   <div class="prose"><ul>
-    <li>The sample is early and non-random. Counts and ranges here describe these {n_models} models, not CMIP7.</li>
+    <li>The sample is early and non-random. Counts and ranges here describe these {n_used} models, not CMIP7.</li>
     <li>150-yr Gregory ECS is an effective sensitivity and understates the long-run equilibrium for models with strong
     pattern effects.</li>
     <li>CMIP7 forcing differs from CMIP6, so CMIP6→CMIP7 differences in historical warming mix model and forcing changes.

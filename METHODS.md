@@ -1,6 +1,6 @@
 # CMIP7 analysis: warming and climate sensitivity (methods)
 
-Status: **first complete pass** (snapshot of ESGF holdings taken 2026-10-24; all 2,419 manifest files acquired). CMIP7 publication
+Status: snapshot of ESGF holdings taken **2026-11-17** (all 2,629 manifest files acquired). CMIP7 publication
 is ongoing daily; every number here is specific to that snapshot and will change.
 
 ## 1. Data
@@ -8,38 +8,42 @@ is ongoing daily; every number here is specific to that snapshot and will change
 ### 1.1 CMIP7 model output (ESGF)
 - Discovery: ESGF CMIP7 STAC indexes (`discovery.east.esgf.io`, `discovery.west.esgf.io`) via
   `intake-esgf` 2026.9.28, per the [CMIP7 user guidance](https://wcrp-cmip.github.io/cmip7-guidance/docs/CMIP7/Guidance_for_users/#1-accessing-cmip7-data).
-  Script: `scripts/build_manifest.py` → `inventory/manifest_2026-10-24.csv` (file-level: URLs,
+  Script: `scripts/build_manifest.py` → `inventory/manifest_2026-11-17.csv` (file-level: URLs,
   sizes, sha256 checksums, versions; latest version per dataset only).
 - Branded variables: `tas_tavg-h2m-hxy-u` (monthly, region `glb`); `rsdt`, `rsut`, `rlut`
-  `_tavg-u-hxy-u` (monthly) for piControl and abrupt-4xCO2.
+  `_tavg-u-hxy-u` (monthly) for piControl and abrupt-4xCO2. Sub-monthly output is not used:
+  CAS-ESM2-1-CSM `scen7-vl` publishes `tas` only as 3-hourly fields, so it is absent here.
 - Experiments: `historical`, `esm-hist`, `piControl`, `esm-piControl`, `abrupt-4xCO2`, `1pctCO2`,
   and all ScenarioMIP `scen7-*` / `esm-scen7-*` Tier-1 scenarios (only h, m, vl published so far).
   Experiment definitions (WCRP-universe CV, saved in `reference/cmip7_cv/`): `historical` and
   `esm-hist` run 1850–2021; `scen7-*` run 2022–2100. `scen7-h` = "High emission scenario … expected
   to result in forcings below SSP5-8.5"; `scen7-m` = "Medium … extending current policies";
   `scen7-vl` = "Very Low … limiting warming to 1.5C by the end of the century".
-- Acquisition: `scripts/acquire_global_means.py`. Each file is downloaded over HTTPS, sha256-verified
-  against the index checksum (2,411 of 2,419 files pass; see stale-index note below), reduced to an area-weighted global mean per month, and deleted. No raw
+- Acquisition: `scripts/acquire_global_means.py`. Each file is downloaded over HTTPS (dropped
+  connections resume with an HTTP Range request where the node supports it), sha256-verified
+  against the index checksum (2,620 of 2,629 files pass; see stale-index note below), reduced to an area-weighted global mean per month, and deleted. No raw
   field is retained (peak raw footprint ≈ workers × one file). Outputs: `derived/monthly/<dataset>/`,
   global attributes in `derived/attrs/`, per-file log in `derived/acquire_log.csv`.
-- Area weights: exact spherical band areas from `lat_bnds`, |sin φ₂ − sin φ₁|. All nine models are
-  rectilinear lon-lat grids with bounds. Check vs cos(lat) on the first time step of the first file
-  per model: |difference| ≤ 0.006 (native units; K or W m⁻²). `areacella` not used.
+- Area weights: exact spherical band areas from `lat_bnds`, |sin φ₂ − sin φ₁|. All 11 models are
+  rectilinear lon-lat grids with bounds. Check vs cos(lat) on the first time step of every file:
+  |difference| ≤ 0.011 (native units; K or W m⁻²). `areacella` not used.
 - Holdings snapshot (members with `tas_tavg-h2m-hxy-u`, i.e. what was acquired; the raw inventory
   `inventory/cmip7_mon_member_counts.csv` also counts `tmaxavg`/`tminavg`/`tmax` brandings, which are
   monthly means of daily extremes and are **not** used):
 
 | Model | Institution | hist | esm-hist | scen7 (h/m/vl) | esm-scen7 (h/m/vl) | piCtl+4xCO2 rad | 1pctCO2 |
 |---|---|---|---|---|---|---|---|
-| CanESM6-0-MR | CCCma | 25 | 19 | 25/25/25 | 25/25/25 | ✓ | ✓ |
+| CanESM6-0-MR | CCCma | 25 | 23 | 25/25/25 | 25/25/25 | ✓ | ✓ |
 | CanESM5-1 | CCCma | – | 25 | – | 25/25/25 | ✓ | ✓ |
-| UKESM1-3-LL | UKNCSP | 2 (f2) | 8 | 1/–/– | 8/6/8 | ✓ | ✓ |
-| UKCM2-0-LL | UKNCSP | 5 | – | – | – | ✓ | ✓ |
-| UKCM2a-0-HH | UKNCSP | 3 | – | 2/–/2 | – | ✓ | – |
-| ACCESS-ESM1-6 | ACCESS-Consortium | 10 | 30 | – | – | ✓ | ✓ |
-| CAS-ESM2-1-CSM | CAS | 1 | – | – (vl has tmax only) | – | piCtl only | – |
-| EC-Earth3-ESM-1-1 | EC-Earth-Consortium | – | 1 | – | 1/–/1 | – | – |
+| UKESM1-3-LL | UKNCSP | 5 (f2) | 8 | 3/–/3 | 8/7/8 | ✓ | ✓ |
+| UKCM2-0-LL | UKNCSP | 5 | – | –/–/1 | – | ✓ | ✓ |
+| UKCM2a-0-HH | UKNCSP | 3 | – | 2/–/2 | – | ✓ | ✓ |
+| ACCESS-ESM1-6 | ACCESS-Consortium | 10 | 30 | 10/–/– | – | ✓ | ✓ |
+| CAS-ESM2-1-CSM | CAS | 1 | – | – (vl `tas` 3-hourly only) | – | piCtl only | – |
+| EC-Earth3-ESM-1-1 | EC-Earth-Consortium | – | 2 | – | 2/–/1 | – | – |
 | CNRM-ESM2-1e | CNRM-CERFACS | 1 (r2) | – (r6 has tmaxavg/tminavg only) | – | – | – | – |
+| KACE-2-0-G | NIMS-KMA | 1 | – | – | – | – | – |
+| FGOALS-f3-L | CAS | – | – | 3/–/3 | – | – | – |
 
 - Data-quality notes:
   - **CanESM5-1** datasets carry version `v20190429` (impossible for scen7 experiments). Global
@@ -47,19 +51,24 @@ is ongoing daily; every number here is specific to that snapshot and will change
     `v51p2-c7a4xco2-r1`, parent `piControl` in CMIP7). Treated as a metadata error; included. Physics
     variant p2.
   - **UKESM1-3-LL** `historical` is forcing index f2 while its piControl/abrupt/1pct are f1.
-  - CanESM6-0-MR piControl was still being published on 2026-10-24 (Climate Resource tracker).
-  - **CanESM5-1 piControl stale index**: 8 files (all 4 `tas` files; 2 each of `rsut`, `rlut`) on the
+  - **FGOALS-f3-L** has only `scen7-h`/`scen7-vl` (r1–r3). Each declares parent `historical r1i1p1f1`,
+    which is not published, and there is no control run, so the model is listed but not analysed.
+  - **Stale index checksums.** CanESM5-1 piControl: 8 files (all 4 `tas` files; 2 each of `rsut`, `rlut`) on the
     CCCma node were rewritten on 2026-08-19 under the same dataset version. The served files are
     complete (size equals the server `Content-Length`; e.g. 26,589,888 vs 26,612,556 bytes in the index),
     readable, and contiguous (1,200 months per file), but neither size nor sha256 matches the ESGF index.
     Accepted with `--accept-stale` and logged as `ok-stale` in `derived/acquire_log.csv`. CanESM5-1 ECS
-    therefore rests on the server copy of its piControl, which cannot be checksum-verified. Worth
-    reporting to CCCma / [ESGF errata](https://errata.esgf.io/).
+    therefore rests on the server copy of its piControl, which cannot be checksum-verified. The single
+    KACE-2-0-G `historical` file is in the same state (size equals the server `Content-Length`, sha256
+    differs from the index); its global mean is complete and contiguous (2,064 months, 1850–2021). Worth
+    reporting to CCCma, NIMS-KMA / [ESGF errata](https://errata.esgf.io/).
   - **Scenario parents are matched by metadata, not variant label.** UKESM1-3-LL `esm-scen7-*` r7/r8
-    are `…f1` but declare parent `esm-hist r7i1p1f2`/`r8i1p1f2`. UKESM1-3-LL `scen7-h r1i1p1f1` declares
-    parent `historical r1i1p1f1`, which is not published (only f2 historical members exist), so it is
-    not spliced. CanESM6-0-MR esm-scen7 r6–r9, r24, r25 and EC-Earth3-ESM-1-1 esm-scen7 r1 lack a
-    published parent and are likewise not spliced (`outputs/splice_check.csv`). Every used splice
+    and `scen7-h`/`scen7-vl` r2 are `…f1` but declare an f2 parent (`esm-hist r7i1p1f2`/`r8i1p1f2`,
+    `historical r2i1p1f2`), which is published, so they are spliced. UKESM1-3-LL `scen7-h`/`scen7-vl`
+    r1 and r3 declare parent `historical r1i1p1f1`/`r3i1p1f1`, and `esm-scen7-m` r8 declares
+    `esm-hist r8i1p1f1`; none of these is published (the historical members are f2, esm-hist r8 is
+    f2), so they are not spliced. CanESM6-0-MR esm-scen7 r9 and r25 also lack a published parent
+    (`outputs/splice_check.csv`). Every used splice
     branches at 2022-01-01 in the parent's time axis.
 
 ### 1.2 Observations
@@ -167,7 +176,8 @@ was computed.
 
 ### 2.6 Historical warming (`scripts/gmst.py`)
 - Per member: annual tas → anomaly vs that member's own 1850–1900 mean. Historical runs are truncated
-  at 2021 (ACCESS-ESM1-6 and one UKCM2a-0-HH member extend to 2022).
+  at 2021 (ACCESS-ESM1-6 and one UKCM2a-0-HH member extend to December 2022, CAS-ESM2-1-CSM to
+  November 2022).
 - Per model: the value is the **mean of per-member metrics** over members covering the window
   (`<metric>_n` columns), never the metric of a skipna ensemble-mean series (which would change
   composition mid-window). One value per model × track in all cross-model statements.
@@ -177,9 +187,9 @@ was computed.
   `parent_experiment_id`/`parent_variant_label`, required to branch at 2022-01-01. Preference
   scen7-m > scen7-h > scen7-vl (esm- analogues for esm-hist).
 - Splice sensitivity (`outputs/splice_sensitivity.csv`): ensemble-mean metric with each scenario over
-  the members continued in all of them. Max range across scenarios: 0.021 °C (2015–2024 warming) and
-  0.006 °C/decade (1980–2024 trend), both UKCM2a-0-HH (n = 2); ≤ 0.012 °C and ≤ 0.004 °C/decade for the
-  others. Per-member differences are larger (chaotic divergence after the branch) and are not a splice
+  the members continued in all of them. Max range across scenarios: 0.052 °C (2015–2024 warming) and
+  0.015 °C/decade (1980–2024 trend), both EC-Earth3-ESM-1-1 (n = 1); UKCM2a-0-HH (n = 2) 0.021 °C and
+  0.006 °C/decade; ≤ 0.012 °C and ≤ 0.004 °C/decade for the others. Per-member differences are larger (chaotic divergence after the branch) and are not a splice
   error.
 - Metrics vs GSAT ensemble:
   1. Warming 2012–2021 vs 1850–1900 (every model; no splice needed). Also 2011–2020 for AR6 comparison.
@@ -192,8 +202,10 @@ was computed.
   the (1 + 1/n). σ_iv is the SD of the metric across members if ≥ 5 members, else from the detrended
   parent control (σ of overlapping 10-yr and 51-yr means combined in quadrature for warming metrics,
   treating the two windows as independent; σ of overlapping 42/45/72-yr OLS trends for trends).
-  "Warmer than observed" = z > 1.645 (one-sided 5 %). Models with one member and no control run
-  (EC-Earth3-ESM-1-1, CNRM-ESM2-1e) are not tested. Headline counts are conservative toward the
+  "Warmer than observed" = z > 1.645 (one-sided 5 %). Models with fewer than 5 members and no control
+  run (EC-Earth3-ESM-1-1, CNRM-ESM2-1e, KACE-2-0-G) are not tested. The σ_iv source matters for
+  UKESM1-3-LL `historical` (n = 5, so the member spread is used: σ_iv = 0.164 °C, z = 0.90 for 2012–2021);
+  the piControl σ_iv (0.127 °C) would give z = 1.09, also below the threshold. Headline counts are conservative toward the
   "too warm" claim: a model counts only if every published track exceeds the threshold.
 - **Control drift** (`outputs/drift_check.csv`, sensitivity only). Two corrections, each converted
   to its spurious contribution to 2012–2021 minus 1850–1900 (slope × 141.5 yr) and tested with the same σ:
@@ -207,8 +219,8 @@ was computed.
   (century means 12.95–13.47 °C; segment slopes 0.000–0.030 °C/decade for branches at control years
   2100–2180, full-record 0.002); UKCM2a-0-HH 1.48 / 1.63 / 1.63, a genuine cooling drift
   in a 250-yr control (−0.011 °C/decade), so correction *raises* its warming; CAS-ESM2-1-CSM
-  1.13 / 0.99 / 0.94. Control runs are not published for CanESM6-0-MR `esm-piControl`,
-  EC-Earth3-ESM-1-1 and CNRM-ESM2-1e.
+  1.13 / 0.99 / 0.94. Control runs are not published for EC-Earth3-ESM-1-1, CNRM-ESM2-1e and
+  KACE-2-0-G.
 
 ### 2.7 Projections
 Per model ensemble mean (and member range) of ΔGSAT vs 1850–1900 for each scenario; 2041–2060 and
@@ -282,8 +294,9 @@ Descriptive counterpart to fig02 for CMIP6, from the H22 supporting data (Zenodo
 - No blending/masking correction (see 1.2); the omitted effect would, if anything, reduce
   apparent model warm bias.
 - The consistency test assumes model internal variability is realistic; using member spread from
-  esm-hist includes carbon-cycle variability. With 2–3 members (UKESM1-3-LL historical, UKCM2a-0-HH),
-  σ_iv comes from the control, and the test is sensitive to that choice.
+  esm-hist includes carbon-cycle variability. With fewer than 5 members (UKCM2a-0-HH, CAS-ESM2-1-CSM),
+  σ_iv comes from the control, and the test is sensitive to that choice; UKESM1-3-LL historical has
+  exactly 5 (§2.6).
 - CMIP7 historical forcing (CMIP7 forcing datasets, ending 2021) differs from CMIP6; differences
   between a CMIP7 model and its CMIP6 predecessor combine model and forcing changes.
 - esm-hist runs simulate their own CO₂; part of any esm-hist vs historical difference is CO₂, not
@@ -291,6 +304,6 @@ Descriptive counterpart to fig02 for CMIP6, from the H22 supporting data (Zenodo
 
 ## 4. Citation / data availability (CMIP7 requirements)
 No CMIP7 DOIs had been minted as of the guidance page (2026-09-23). Datasets are cited by DRS id and
-version (`inventory/manifest_2026-10-24.csv`); a source/institution/version table will be generated
+version (`inventory/manifest_2026-11-17.csv`); a source/institution/version table will be generated
 into `outputs/cmip7_dataset_table.csv`. Licence: per-dataset global attribute (CC-BY-4.0 for all files
 inspected). Acknowledgement text per the CMIP7 guidance to be included in any publication.

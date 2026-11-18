@@ -26,7 +26,7 @@ LINEAGE = {"CanESM6-0-MR": ("CanESM5", "r1i1p1f1"), "CanESM5-1": ("CanESM5", "r1
 AR6 = {"ECS": (3.0, (2.5, 4.0), (2.0, 5.0)), "TCR": (1.8, (1.4, 2.2), (1.2, 2.4))}
 C7 = S.SLOTS[0]
 C6 = "#8d8c86"
-LABEL_OFFSET = {"UKESM1-3-LL": (0, -12, "center"), "CanESM6-0-MR": (0, 7, "center"), "CanESM5-1": (6, -8, "left")}
+LABEL_OFFSET = {"UKESM1-3-LL": (0, 7, "center"), "CanESM6-0-MR": (0, 7, "center"), "CanESM5-1": (6, -8, "left")}
 
 
 def pairs():
@@ -182,8 +182,11 @@ def fig06(df, ref):
                Patch(color="#d9d8d1", label="AR6 likely ECS × TCR")]
     ax.legend(handles=handles, loc="upper left", frameon=False)
     fig.tight_layout(rect=(0, 0, 1, 0.84))
+    no_tcr = sorted(df[df.TCR.isna()].model)
     S.titles(fig, "ECS and TCR of CMIP7 models so far",
-             "CMIP7 models placed on the CMIP6 distribution (predecessor changes: Fig. 4).\nUKCM2a-0-HH has no 1pctCO2 run yet.", gap=0.075)
+             "CMIP7 models placed on the CMIP6 distribution (predecessor changes: Fig. 4)." +
+             (f"\n{', '.join(no_tcr)} {'has' if len(no_tcr) == 1 else 'have'} no 1pctCO2 run yet." if no_tcr else ""),
+             gap=0.075)
     S.save(fig, FIG / "fig06_ecs_tcr_scatter")
 
 
