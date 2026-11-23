@@ -7,6 +7,7 @@ read from the computed outputs; none is typed in.
 """
 import html, json, pathlib, re, shutil, sys
 import numpy as np
+import json
 import pandas as pd
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
@@ -53,6 +54,7 @@ def main():
     hm = pd.read_csv(OUT / "historical_metrics.csv")
     pm = pd.read_csv(OUT / "projection_metrics.csv")
     sp = pd.read_csv(OUT / "splice_sensitivity.csv")
+    sc = pd.read_csv(OUT / "splice_check.csv")
     ref = pd.read_csv(ROOT / "reference" / "hausfather2022_cmip6_ecs_tcr.csv", comment="#")
     ref = ref[~ref.copy_of_other_model]
 
@@ -60,15 +62,59 @@ def main():
     used = set(hm[hm.track != "obs"].model) | set(lp.model)
     n_used = len(used)
     pending = sorted(set(man.source_id) - used)
-    pend_txt = ""
+    def why(m):
+        ex = set(man[man.source_id == m].experiment_id)
+        if ex <= {"piControl", "esm-piControl"}:
+            return "only a control run so far"
+        if not ex & {"historical", "esm-hist", "abrupt-4xCO2", "1pctCO2"}:
+            return "only scenario runs whose declared parent historical run is not yet published"
+        return "no usable run yet"
+    reasons = {}
+    for m in pending:
+        reasons.setdefault(why(m), []).append(m)
+    pend_txt = "".join(f" {', '.join(ms)} {'has' if len(ms) == 1 else 'have'} {r}." for r, ms in reasons.items())
     if pending:
-        pend_txt = (f" {', '.join(pending)} {'has' if len(pending) == 1 else 'have'} only scenario runs whose declared "
-                    f"parent historical run is not yet published, so {'it is' if len(pending) == 1 else 'they are'} "
-                    "listed below but not analysed.")
+        pend_txt += (f" {'It is' if len(pending) == 1 else 'These are'} listed in the holdings table but not analysed.")
     n_files, gb = len(man), man["size"].sum() / 1e9
     n_stale = int(dst.files_ok_stale_index.sum())
     st = dst[dst.files_ok_stale_index > 0].groupby(["source_id", "experiment_id"]).files_ok_stale_index.sum()
     stale_txt = "; ".join(f"{s} {e}: {n}" for (s, e), n in st.items())
+    # files fetched with TLS certificate checks off (acquire_global_means.py --insecure-host); each must match
+    # its index sha256, which acquisition enforces
+    alog = pd.read_csv(ROOT / "derived" / "acquire_log.csv").groupby("filename").tail(1)
+    tls = alog[alog.msg.fillna("").str.contains("tls-unverified") & alog.filename.isin(man.filename)]
+    tls_models = sorted(man[man.filename.isin(tls.filename)].source_id.unique())
+    tls_hosts = sorted({json.loads(u)[0].split("/")[2] for u in man[man.filename.isin(tls.filename)].urls})
+    # scenario joins made by a documented exception to the parent-metadata rule (gmst.py, METHODS §1.1)
+    sc_used = sc[sc.used]
+    exc = sc_used[sc_used.rule != "metadata"].groupby(["model", "rule"]).size()
+    off_typ, off_sd = sc_used.offset_5yr.median(), sc_used.offset_5yr.std()
+    big = sc_used[(sc_used.offset_5yr - off_typ).abs() > 0.5]
+    exc_html = ""
+    if ("KACE-2-0-G", "placeholder-branch") in exc.index:
+        exc_html += (f"<li>KACE-2-0-G: its {exc['KACE-2-0-G', 'placeholder-branch']} scenario runs give "
+                     "<code>branch_time_in_parent</code> = 0 (1850), apparently a placeholder. They start in 2022 and "
+                     "name the model's only historical run as parent, so they are joined to it.</li>")
+    if ("FGOALS-g3-5", "relabel-same-label") in exc.index:
+        fg = sc_used[(sc_used.model == "FGOALS-g3-5") & (sc_used.rule == "relabel-same-label")]
+        fy = sorted(fg.first_year_in_file.unique())
+        exc_html += (f"<li>FGOALS-g3-5: all {len(fg)} scen7 runs are 79 years long, but "
+                     f"their time axes start in {', '.join(map(str, fy))} depending on the member, and every run names "
+                     "historical r1 as parent with a branch date in 1855. The values clearly run 2022–2100, so each run is "
+                     "relabelled to 2022–2100 and joined to the historical member with the same number. That pairing is "
+                     "an assumption: neither monthly continuity at the join nor matching scen7-h with scen7-vl runs "
+                     "identifies the true parent. Their 2022–2026 mean is "
+                     f"{fg.offset_5yr.mean():+.2f} °C (SD {fg.offset_5yr.std():.2f}) relative to the parent's 2017–2021, "
+                     f"close to the {off_typ:+.2f} °C median of all joins.</li>")
+    big_html = "".join(
+        f"<li>{esc(r.model)} <code>{esc(r.scenario)}</code> {esc(r.member)}: its 2022–2026 mean is "
+        f"{r.offset_5yr:+.2f} °C relative to its declared parent's 2017–2021 mean, against a median of "
+        f"{off_typ:+.2f} °C (SD {off_sd:.2f}) across all {len(sc_used)} joins, although its branch metadata are "
+        "consistent. It is kept under the metadata rule, so it pulls down the model's 2015–2024 value and early "
+        "projection years.</li>" for r in big.itertuples())
+    tls_html = (f"<li>{len(tls)} {esc(', '.join(tls_models))} files were downloaded with TLS certificate checking "
+                f"switched off for {esc(', '.join(tls_hosts))}, whose certificate had expired. All of them match the "
+                "sha256 in the ESGF index.</li>") if len(tls) else ""
 
     # ---- validation
     val = c6[c6.validation_set]
@@ -107,7 +153,8 @@ def main():
     untested = sorted(set(mh.model) - set(t.groups))
     ts = mh.dropna(subset=["dT_2012_2021_driftcorr_seg_z"]).groupby("model").dT_2012_2021_driftcorr_seg_z
     n_hot_seg = int((ts.min() > 1.645).sum())
-    drop_seg = sorted(set(hot_models) - set(ts.min()[ts.min() > 1.645].index))
+    drop_seg = sorted(set(hot_models) & set(ts.groups) - set(ts.min()[ts.min() > 1.645].index))
+    no_ctl_hot = sorted(set(hot_models) - set(ts.groups))
     tf = mh.dropna(subset=["dT_2012_2021_driftcorr_z"]).groupby("model").dT_2012_2021_driftcorr_z
     n_hot_full = int((tf.min() > 1.645).sum())
     tt = mh.dropna(subset=["trend_1980_2021_z"]).groupby("model").trend_1980_2021_z
@@ -294,7 +341,7 @@ ul {{ margin: 0; padding-left: 1.2em; display: grid; gap: 6px; }}
       <p>The GSAT ensemble gives {f2(obs.dT_2012_2021)} °C. {n_hot} of {n_tested} testable models warm significantly
       more in every published track ({esc(hot_txt)}).{(' ' + esc(', '.join(split)) + ' does so in one track only.') if split else ''}
       Removing the control-run drift leaves {n_hot_full} of {tf.ngroups}; removing each member's contemporaneous
-      control-run trend, which also contains centennial variability, gives {n_hot_seg} of {ts.ngroups}{(' (' + esc(', '.join(drop_seg)) + ' drops out)') if drop_seg else ''}.</p></div>
+      control-run trend, which also contains centennial variability, gives {n_hot_seg} of {ts.ngroups}{(' (' + esc(', '.join(drop_seg)) + (' drops' if len(drop_seg) == 1 else ' drop') + ' out)') if drop_seg else ''}.{(' ' + esc(', '.join(no_ctl_hot)) + (' has' if len(no_ctl_hot) == 1 else ' have') + ' no control run, so ' + ('it is' if len(no_ctl_hot) == 1 else 'they are') + ' not in the drift-corrected counts.') if no_ctl_hot else ''}</p></div>
     <div class="finding"><span class="eyebrow">Code validation</span><span class="k">≤ {dE:.3f} °C</span>
       <p>The same code reproduces published CMIP6 ECS (Zelinka et al. 2020) to ≤ {dE:.3f} °C and TCR (AR6 Table 7.SM.5)
       to ≤ {dT_ar6:.3f} °C on the three validation models.</p></div>
@@ -356,12 +403,12 @@ ul {{ margin: 0; padding-left: 1.2em; display: grid; gap: 6px; }}
 <section>
   <h2>Projections</h2>
   <div class="prose"><p>{n_proj} models have scenario runs joined to a published historical parent so far, through 2100 for scen7-h,
-  scen7-m and scen7-vl.
+  scen7-m and scen7-vl{(' (' + esc(' and '.join(sorted(set(m for m, _ in exc.index)))) + ' only through documented metadata exceptions; see Validation and data checks)') if len(exc) else ''}.
   Under scen7-h, 2081–2100 warming ranges from {f2(p_h.dT_2081_2100.min())} to {f2(p_h.dT_2081_2100.max())} °C across
   models and tracks; under scen7-vl, from {f2(p_vl.dT_2081_2100.min())} to {f2(p_vl.dT_2081_2100.max())} °C. {n_proj_warm} of
   these {n_proj} warm more than observed over 2012–2021 in at least one track, so they should not be read as a CMIP7
   projection range.</p></div>
-  {figure("fig03_projections", "Ensemble-mean tas by scenario; solid lines concentration-driven, dashed emissions-driven.")}
+  {figure("fig03_projections", "One panel per model: ensemble-mean tas by scenario (colour), concentration-driven solid and emissions-driven dashed; shading is the member range.")}
   {proj_tab}
 </section>
 
@@ -382,6 +429,7 @@ ul {{ margin: 0; padding-left: 1.2em; display: grid; gap: 6px; }}
     <li>Scenario runs are joined to their historical parent by metadata, not variant label: some UKESM1-3-LL esm-scen7 f1
     members branch from f2 esm-hist members. Runs whose declared parent is unpublished are not used
     (<code>splice_check.csv</code>).</li>
+    {exc_html}{big_html}{tls_html}
     <li>Version tags: CanESM5-1 datasets carry <code>v20190429</code>, but their global attributes identify CMIP7 output
     created in 2026. UKESM1-3-LL <code>historical</code> is forcing variant f2, while its control and idealised runs are f1.</li>
     <li>Some datasets in the ESGF inventory are daily-maximum or daily-minimum brandings (<code>tmaxavg</code>,

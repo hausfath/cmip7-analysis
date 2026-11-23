@@ -10,7 +10,12 @@ the median, 5 / 95 % and SD of each metric over the members. Both modes give ide
 Scenario runs are joined to the historical run named in their own parent metadata
 (parent_experiment_id / parent_variant_label, branch at 2022-01-01), never by
 matching variant labels: some UKESM1-3-LL esm-scen7 f1 members branch from f2
-esm-hist members.
+esm-hist members. Two documented exceptions (METHODS §1.1), both recorded in splice_check.csv:
+  placeholder-branch   branch_time_in_parent = 0 (decodes to 1850), but the run starts 2022-01
+                       and its declared parent exists (KACE-2-0-G scen7-*)
+  relabel-same-label   time axis offset by multiples of 50 years and every run naming historical r1
+                       as parent at 1855; years relabelled to start 2022 and the run spliced to the
+                       same-numbered historical member, an assumption (FGOALS-g3-5 scen7-*)
 
 Outputs
   derived/gmst/<model>.<experiment>.csv   annual ΔT vs 1850–1900 (the parent historical
@@ -39,7 +44,7 @@ OUT = ROOT / "outputs"
 BASE = (1850, 1900)
 HIST_END = 2021
 MODELS = ["CanESM6-0-MR", "CanESM5-1", "UKESM1-3-LL", "UKCM2-0-LL", "UKCM2a-0-HH", "ACCESS-ESM1-6",
-          "CAS-ESM2-1-CSM", "EC-Earth3-ESM-1-1", "CNRM-ESM2-1e", "KACE-2-0-G"]
+          "CAS-ESM2-1-CSM", "EC-Earth3-ESM-1-1", "CNRM-ESM2-1e", "KACE-2-0-G", "FGOALS-g3-5"]
 SCEN = {"historical": ["scen7-m", "scen7-h", "scen7-vl"],              # splice preference order
         "esm-hist": ["esm-scen7-m", "esm-scen7-h", "esm-scen7-vl"]}
 CONTROL = {"historical": "piControl", "esm-hist": "esm-piControl"}
@@ -49,6 +54,9 @@ METRICS = {"dT_2012_2021": ("mean", 2012, 2021), "dT_2015_2024": ("mean", 2015, 
            "trend_1980_2021": ("trend", 1980, 2021), "trend_1950_2021": ("trend", 1950, 2021),
            "trend_1980_2024": ("trend", 1980, 2024)}
 AR6_2011_2020 = (1.09, 0.95, 1.20)   # AR6 WGI SPM A.1.2, GMST 2011–2020 vs 1850–1900
+# scenario runs whose published time axis and parent metadata are both wrong (METHODS §1.1)
+RELABEL_SAME_LABEL = {("FGOALS-g3-5", "scen7-h"), ("FGOALS-g3-5", "scen7-vl")}
+SCEN_YEARS = 2100 - HIST_END   # 79
 
 
 def metric(s, kind, y0, y1):
@@ -93,15 +101,34 @@ def find_scenarios(model, hexp):
         for mem in L.members_cmip7(model, s):
             x, a = safe(model, s, mem)
             pexp, pmem = a.get("parent_experiment_id"), a.get("parent_variant_label")
+            declared = pmem
             d = cftime.num2date(float(a["branch_time_in_parent"]), a.get("parent_time_units") or a["time_units"],
                                 a["calendar"])
+            first_year = int(x.index.min())
+            rule = "metadata"
+            if (model, s) in RELABEL_SAME_LABEL:
+                if len(x) != SCEN_YEARS:
+                    raise ValueError(f"{model} {s} {mem}: {len(x)} years, expected {SCEN_YEARS} to relabel")
+                x = x.copy()
+                x.index = np.arange(HIST_END + 1, HIST_END + 1 + len(x))
+                pmem, rule = mem, "relabel-same-label"
             ph, _ = safe(model, pexp, pmem)
-            ok = pexp == hexp and ph is not None and (d.year, d.month, d.day) == (HIST_END + 1, 1, 1)
-            jump = float(x.loc[HIST_END + 1] - ph.loc[HIST_END]) if ph is not None else np.nan
+            starts = int(x.index.min()) == HIST_END + 1
+            ok = pexp == hexp and ph is not None and starts and (
+                rule == "relabel-same-label" or (d.year, d.month, d.day) == (HIST_END + 1, 1, 1))
+            if (not ok and pexp == hexp and ph is not None and starts
+                    and float(a["branch_time_in_parent"]) == 0.0):
+                ok, rule = True, "placeholder-branch"
+            jump = float(x.loc[HIST_END + 1] - ph.loc[HIST_END]) if ph is not None and starts else np.nan
+            # 5-yr version, less sensitive to one unusual year: scenario 2022–2026 minus parent 2017–2021
+            off5 = (float(x.loc[HIST_END + 1:HIST_END + 5].mean() - ph.loc[HIST_END - 4:HIST_END].mean())
+                    if ph is not None and starts else np.nan)
             checks.append({"model": model, "scenario": s, "member": mem, "parent_experiment": pexp,
-                           "parent_member": pmem, "label_differs": pmem != mem,
+                           "parent_member": pmem, "declared_parent_member": declared,
+                           "label_differs": pmem != mem,
                            "parent_found": ph is not None, "branch_decoded": str(d),
-                           "jump_2021_2022": jump, "used": ok})
+                           "first_year_in_file": first_year, "rule": rule if ok else "rejected",
+                           "jump_2021_2022": jump, "offset_5yr": off5, "used": ok})
             if ok:
                 out.setdefault(pmem, {})[s] = x
     return out, checks

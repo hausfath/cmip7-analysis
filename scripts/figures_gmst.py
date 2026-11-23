@@ -6,7 +6,7 @@ fig01_historical_small_multiples  per-model GSAT vs the GSAT ensemble, 1850–20
 fig02_historical_metrics          2012–2021 warming and 1980–2021 trend per model × track
 fig02b_historical_metrics_cmip6   the same metrics for CMIP6 (Hausfather et al. 2022 data, one member per
                                   model); descriptive only, no consistency test
-fig03_projections                 ensemble-mean GSAT by scenario, 1850–2100
+fig03_projections                 per-model ensemble-mean GSAT by scenario, 1950–2100
 """
 import sys, pathlib
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
@@ -20,7 +20,7 @@ from matplotlib.patches import Patch  # noqa: E402
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 GD, OUT, FIG = ROOT / "derived" / "gmst", ROOT / "outputs", ROOT / "figures"
 MODELS = ["CanESM6-0-MR", "CanESM5-1", "UKESM1-3-LL", "UKCM2-0-LL", "UKCM2a-0-HH", "ACCESS-ESM1-6",
-          "CAS-ESM2-1-CSM", "EC-Earth3-ESM-1-1", "CNRM-ESM2-1e", "KACE-2-0-G"]
+          "CAS-ESM2-1-CSM", "EC-Earth3-ESM-1-1", "CNRM-ESM2-1e", "KACE-2-0-G", "FGOALS-g3-5"]
 OBS_END = 2025
 
 
@@ -87,7 +87,7 @@ def fig02(hm):
         ", n=" + rows.n_members.astype(int).astype(str) + ")"
     rows = rows.sort_values("dT_2012_2021")
     y = np.arange(len(rows))
-    fig, axs = plt.subplots(1, 2, figsize=(S.WIDTH, 95 * S.MM), sharey=True)
+    fig, axs = plt.subplots(1, 2, figsize=(S.WIDTH, 100 * S.MM), sharey=True)
     for ax, k, unit, lab in [(axs[0], "dT_2012_2021", "°C", "2012–2021 warming (°C vs 1850–1900)"),
                              (axs[1], "trend_1980_2021", "°C/decade", "1980–2021 trend (°C per decade)")]:
         ax.axvspan(obs[f"{k}_p05"], obs[f"{k}_p95"], color=S.OBS_BAND, alpha=0.6, lw=0)
@@ -108,7 +108,7 @@ def fig02(hm):
                Line2D([], [], color="#999", lw=1.6, label="Member range"),
                Patch(color=S.OBS_BAND, label="GSAT ensemble 5–95%")]
     fig.legend(handles=handles, loc="lower center", ncol=4, frameon=False, bbox_to_anchor=(0.55, -0.06))
-    fig.tight_layout(rect=(0, 0.02, 1, 0.82))
+    fig.tight_layout(rect=(0, 0.02, 1, 0.79))
     # Title bound to the computed consistency test (z > 1.645: one-sided 5%, obs uncertainty
     # + internal variability). Conservative toward the "too warm" claim: a model counts only
     # if every published track exceeds obs.
@@ -122,8 +122,9 @@ def fig02(hm):
              "Ensemble mean (dot) and member range (bar) of tas; GSAT ensemble median (line) and 5–95% (shading).\n"
              "Counted if every track exceeds obs at one-sided 5% (obs uncertainty + internal variability)"
              + (f"; {split} exceeds in one track only" if n_split else "")
-             + f".\nNot tested (no control run): {', '.join(untested)}. With each member's contemporaneous "
-             f"control trend removed: {n_hot_seg} of {ts.ngroups}.", gap=0.06)
+             + f".\nNot tested (fewer than 5 members, no control run): {', '.join(untested)}.\n"
+             f"With each member's contemporaneous control trend removed: {n_hot_seg} of the {ts.ngroups} "
+             "with a control run.", gap=0.06)
     S.save(fig, FIG / "fig02_historical_metrics")
 
 
@@ -178,35 +179,57 @@ def fig02b(h6):
 
 
 def fig03(obs, pm):
-    scen = [("vl", "Very low (scen7-vl)"), ("m", "Medium (scen7-m)"), ("h", "High (scen7-h)")]
-    fig, axs = plt.subplots(1, 3, figsize=(S.WIDTH, 80 * S.MM), sharey=True)
-    used = set()
-    for ax, (s, title) in zip(axs, scen):
+    """One panel per model; colour = scenario, line style = concentration vs emissions driven."""
+    scen = [("vl", "Very low (vl)"), ("m", "Medium (m)"), ("h", "High (h)")]
+    tracks = [("scen7", "Conc.", "-"), ("esm-scen7", "Emis.", (0, (3, 1.5)))]
+    mods = [m for m in MODELS if any(load(m, f"{t}-{s}") is not None for t, _, _ in tracks for s, _ in scen)]
+    nr = -(-len(mods) // 3)
+    fig, axs = plt.subplots(nr, 3, figsize=(S.WIDTH, (22 + 40 * nr) * S.MM), sharex=True, sharey=True,
+                            squeeze=False)
+    for ax in axs.flat[len(mods):]:
+        ax.set_visible(False)
+    for ax in axs[-2, len(mods) - 3 * (nr - 1):] if nr > 1 and len(mods) % 3 else []:
+        ax.tick_params(labelbottom=True)
+    for ax, m in zip(axs.flat, mods):
         ax.plot(obs.loc[:OBS_END].index, obs.loc[:OBS_END, "median"], color=S.OBS, lw=0.9)
-        for m in MODELS:
-            for exp, ls in ((f"scen7-{s}", "-"), (f"esm-scen7-{s}", (0, (3, 1.5)))):
-                d = load(m, exp)
+        lines = []
+        for t, tl, ls in tracks:
+            ns = []
+            for s, _ in scen:
+                d = load(m, f"{t}-{s}")
                 if d is None:
                     continue
-                c = S.MODEL_COLOR[m]
-                ax.fill_between(d.index, d.min(axis=1), d.max(axis=1), color=c, alpha=0.12, lw=0)
+                c = S.SCEN_COLOR[s]
+                ax.fill_between(d.index, d.min(axis=1), d.max(axis=1), color=c, alpha=0.14, lw=0)
                 ax.plot(d.index, d.mean(axis=1), color=c, lw=1.1, ls=ls)
-                used.add((m, ls == "-"))
-        ax.set_title(title, loc="left", fontweight="bold", pad=3)
+                ns.append(f"{s} {d.shape[1]}")
+            if ns:
+                lines.append(f"{tl}: " + ", ".join(ns))
+        ax.set_title(m, loc="left", fontweight="bold", pad=3)
+        ax.text(0.03, 0.95, "Members\n" + "\n".join(lines), transform=ax.transAxes, va="top", fontsize=6,
+                color=S.INK2, linespacing=1.4)
         ax.set_xlim(1950, 2100)
         ax.set_ylim(-0.5, 5.5)
         ax.axhline(0, color=S.INK2, lw=0.4)
-    axs[0].set_ylabel("°C vs 1850–1900")
-    mods = [m for m in MODELS if any(u[0] == m for u in used)]
-    handles = [Line2D([], [], color=S.MODEL_COLOR[m], lw=1.6, label=m) for m in mods]
-    handles += [Line2D([], [], color="#777", lw=1.2, label="Concentration-driven"),
-                Line2D([], [], color="#777", lw=1.2, ls=(0, (3, 1.5)), label="Emissions-driven"),
+    for ax in axs[:, 0]:
+        ax.set_ylabel("°C vs 1850–1900")
+    handles = [Line2D([], [], color=S.SCEN_COLOR[s], lw=1.6, label=f"scen7-{s}: {lab}") for s, lab in scen]
+    handles += [Line2D([], [], color="#777", lw=1.2, label="Concentration-driven (scen7-*)"),
+                Line2D([], [], color="#777", lw=1.2, ls=(0, (3, 1.5)), label="Emissions-driven (esm-scen7-*)"),
+                Patch(color="#999", alpha=0.35, label="Member range"),
                 Line2D([], [], color=S.OBS, lw=1.2, label="GSAT ensemble median")]
-    fig.legend(handles=handles, loc="lower center", ncol=4, frameon=False, bbox_to_anchor=(0.5, -0.1))
-    fig.tight_layout(rect=(0, 0.02, 1, 0.84))
+    spare = axs.flat[len(mods):]
+    if len(spare):
+        fig.tight_layout(rect=(0, 0, 1, 0.9))
+        b0, b1 = spare[0].get_position(), spare[-1].get_position()
+        fig.legend(handles=handles, loc="center", ncol=1 if len(spare) == 1 else 2, frameon=False,
+                   bbox_to_anchor=(b0.x0, b0.y0, b1.x1 - b0.x0, b0.height), bbox_transform=fig.transFigure)
+    else:
+        fig.legend(handles=handles, loc="lower center", ncol=4, frameon=False, bbox_to_anchor=(0.5, -0.045))
+        fig.tight_layout(rect=(0, 0.02, 1, 0.9))
     S.titles(fig, "CMIP7 projections published so far",
              "Ensemble-mean tas (line) and member range (shading), °C relative to 1850–1900, by ScenarioMIP "
-             "CMIP7 scenario.", gap=0.07)
+             "CMIP7 scenario.\nPanel text: number of members per scenario.", gap=0.04)
     S.save(fig, FIG / "fig03_projections")
 
 

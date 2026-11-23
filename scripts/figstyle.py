@@ -10,6 +10,8 @@ WIDTH = 180 * MM
 SLOTS = ["#2a78d6", "#eb6834", "#1baf7a", "#eda100", "#e87ba4", "#008300", "#6250d6", "#e34948"]
 MODEL_COLOR = dict(zip(["CanESM6-0-MR", "CanESM5-1", "UKESM1-3-LL", "UKCM2-0-LL", "UKCM2a-0-HH",
                         "ACCESS-ESM1-6", "CAS-ESM2-1-CSM", "EC-Earth3-ESM-1-1"], SLOTS))
+# scenario colours (validated all-pairs; amber < 3:1 contrast, so always with legend/labels)
+SCEN_COLOR = {"vl": SLOTS[0], "m": SLOTS[3], "h": SLOTS[7]}
 TRACK_COLOR = {"historical": SLOTS[0], "esm-hist": SLOTS[1]}
 TRACK_LABEL = {"historical": "Concentration-driven", "esm-hist": "Emissions-driven"}
 OBS = "#0b0b0b"

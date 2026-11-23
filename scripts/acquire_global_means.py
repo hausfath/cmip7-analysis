@@ -9,7 +9,8 @@ Outputs: derived/monthly/<dskey>/<filename>.csv   (one per raw file)
          derived/attrs/<dskey>.json               (global attrs of first file)
          derived/acquire_log.csv                  (status per file)
 
-Usage  : python -I scripts/acquire_global_means.py [--sources A,B] [--exclude C]
+Usage  : python -I scripts/acquire_global_means.py [--sources A,B] [--exclude C] [--accept-stale]
+                                                   [--insecure-host HOST ...]
 """
 import argparse, hashlib, json, pathlib, sys, threading, time, traceback, urllib.parse
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -61,6 +62,14 @@ def verify(path, checksum, ctype):
 
 
 ACCEPT_STALE = False   # --accept-stale: see process()
+# --insecure-host: data nodes whose TLS certificate is not checked (e.g. expired). Files from these
+# hosts must match the ESGF index sha256 exactly (the index itself comes over verified TLS);
+# the stale-index exception never applies to them.
+INSECURE_HOSTS = set()
+
+
+def _host(url):
+    return urllib.parse.urlparse(url).netloc
 
 
 class StaleIndex(Exception):
@@ -75,7 +84,8 @@ def _fetch(url, dest, max_resumes=20):
     for _ in range(max_resumes + 1):
         hdr = {"Range": f"bytes={got}-"} if got else {}
         try:
-            with requests.get(url, stream=True, timeout=(30, 300), headers=hdr) as r:
+            with requests.get(url, stream=True, timeout=(30, 300), headers=hdr,
+                              verify=_host(url) not in INSECURE_HOSTS) as r:
                 r.raise_for_status()
                 if got and r.status_code != 206:      # no range support: start over
                     got = 0
@@ -104,7 +114,7 @@ def download(urls, dest, size):
                     clen = _fetch(url, dest)
                 got = dest.stat().st_size
                 if size and got != int(size):
-                    if ACCEPT_STALE and got == clen:
+                    if ACCEPT_STALE and got == clen and _host(url) not in INSECURE_HOSTS:
                         raise StaleIndex(url)
                     raise IOError(f"size {got} != {size}")
                 return url
@@ -182,6 +192,10 @@ def process(row):
         try:
             url = download(json.loads(row.urls), tmp, row.size)
             chk = verify(tmp, row.checksum, row.checksum_type)
+            if _host(url) in INSECURE_HOSTS:
+                if chk != "sha256-ok":
+                    raise IOError(f"TLS unverified and no index checksum to check: {fn}")
+                chk += ", tls-unverified"
         except StaleIndex as e:
             url, chk = str(e), "index-stale: size==server Content-Length, sha256!=index"
         df, attrs = reduce_file(tmp, var)
@@ -219,9 +233,16 @@ def main():
     ap.add_argument("--exclude", default="")
     ap.add_argument("--accept-stale", action="store_true",
                     help="accept files whose size matches the server Content-Length but not the index")
+    ap.add_argument("--insecure-host", action="append", default=[],
+                    help="skip TLS certificate checks for this host; sha256 must then match the index")
     a = ap.parse_args()
     global ACCEPT_STALE
     ACCEPT_STALE = a.accept_stale
+    INSECURE_HOSTS.update(a.insecure_host)
+    if INSECURE_HOSTS:
+        import urllib3
+        urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+        print("TLS certificate checks off for:", ", ".join(sorted(INSECURE_HOSTS)), flush=True)
     m = pd.read_csv(MAN)
     if a.sources:
         m = m[m.source_id.isin(a.sources.split(","))]

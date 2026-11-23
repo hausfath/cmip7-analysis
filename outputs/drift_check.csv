@@ -138,3 +138,9 @@ EC-Earth3-ESM-1-1,esm-hist,r1i1p1f1,esm-piControl,,,,,,,,,no control run publish
 EC-Earth3-ESM-1-1,esm-hist,r4i1p1f1,esm-piControl,,,,,,,,,no control run published
 CNRM-ESM2-1e,historical,r2i1p1f1,piControl,,,,,,,,,no control run published
 KACE-2-0-G,historical,r1i1p1f1,piControl,,,,,,,,,no control run published
+FGOALS-g3-5,historical,r1i1p1f1,piControl,,,,,,,,,no control run published
+FGOALS-g3-5,historical,r2i1p1f1,piControl,,,,,,,,,no control run published
+FGOALS-g3-5,historical,r3i1p1f1,piControl,,,,,,,,,no control run published
+FGOALS-g3-5,historical,r4i1p1f1,piControl,,,,,,,,,no control run published
+FGOALS-g3-5,historical,r5i1p1f1,piControl,,,,,,,,,no control run published
+FGOALS-g3-5,historical,r6i1p1f1,piControl,,,,,,,,,no control run published

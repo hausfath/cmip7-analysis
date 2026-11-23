@@ -2,7 +2,7 @@
 
 **Report: <https://hausfath.github.io/cmip7-analysis/>**
 
-A first look at the CMIP7 output published on ESGF as of **2026-11-17**: historical and projected
+A first look at the CMIP7 output published on ESGF as of **2026-11-23**: historical and projected
 global surface air temperature compared with the GSAT ensemble, and effective climate sensitivity
 (ECS) and transient climate response (TCR) compared with CMIP6. CMIP7 publication is ongoing, so every
 number here belongs to that snapshot. Full conventions, checks and caveats are in [METHODS.md](METHODS.md).
@@ -18,7 +18,7 @@ CMIP6 validation data come from the Pangeo cloud archive and need a separate ven
 | Step | Script | Output |
 |---|---|---|
 | 1. File manifest from the ESGF CMIP7 STAC indexes | `scripts/build_manifest.py` | `inventory/manifest_<date>.csv` |
-| 2. Stream each file, verify sha256, reduce to an area-weighted global monthly mean, delete raw | `scripts/acquire_global_means.py` (`--accept-stale` for files rewritten after indexing: CanESM5-1 piControl, KACE-2-0-G historical) | `derived/monthly/`, `derived/attrs/`, `derived/acquire_log.csv` |
+| 2. Stream each file, verify sha256, reduce to an area-weighted global monthly mean, delete raw | `scripts/acquire_global_means.py` (`--accept-stale` for files rewritten after indexing: CanESM5-1 piControl, KACE-2-0-G historical and scen7-vl; `--insecure-host esg-earthlab.iap.ac.cn` while that node's TLS certificate is expired, which still requires an exact sha256 match) | `derived/monthly/`, `derived/attrs/`, `derived/acquire_log.csv` |
 | 3. CMIP6 validation + predecessor runs (Pangeo) | `scripts/acquire_cmip6_validation.py` (then `--backfill-attrs`) | `derived/cmip6_validation/` |
 | 4. ECS / TCR; CMIP6 first, as a check against published values | `scripts/sensitivity.py cmip6`, then `cmip7` | `outputs/cmip6_sensitivity.csv`, `outputs/cmip7_sensitivity.csv`, `derived/gregory/` |
 | 5. Historical and projected GSAT vs the GSAT ensemble | `scripts/gmst.py` (obs from `data/obs/`; `--obs <file>` rebuilds it from the full ensemble) | `derived/gmst/`, `outputs/historical_metrics.csv`, `projection_metrics.csv`, `splice_*.csv`, `drift_check.csv` |
@@ -30,8 +30,8 @@ CMIP6 validation data come from the Pangeo cloud archive and need a separate ven
 
 Run every script from the repository root with `.venv/bin/python -I scripts/<name>.py`. Steps 4–8 need
 only the derived files committed here (about 50 MB), so every number, figure and the report regenerate
-without downloading anything. Steps 1–2 move about 140 GB over ESGF and are resumable. ESGF holdings
-change daily, so a fresh step 1 will not reproduce the 2026-11-17 manifest; `inventory/manifest_2026-11-17.csv`
+without downloading anything. Steps 1–2 move about 150 GB over ESGF and are resumable. ESGF holdings
+change daily, so a fresh step 1 will not reproduce the 2026-11-23 manifest; `inventory/manifest_2026-11-23.csv`
 records exactly what was used.
 
 fig02b and `cmip6_historical.py` are a descriptive side analysis (CMIP6 models from the
@@ -39,7 +39,7 @@ Hausfather et al. 2022 supporting data, one member each). They are not part of t
 
 ## Inputs and licences
 
-- CMIP7 model output: ESGF, all 479 datasets CC-BY-4.0. Cite per the
+- CMIP7 model output: ESGF, all 570 datasets CC-BY-4.0. Cite per the
   [CMIP7 terms of use](https://wcrp-cmip.github.io/cmip7-guidance/docs/CMIP7/Guidance_for_users/#2-terms-of-use-and-citations-requirements);
   dataset IDs, versions and tracking IDs are in `outputs/cmip7_dataset_table.csv`.
 - CMIP6 output: Pangeo `gs://cmip6`. The six models used (ACCESS-ESM1-5, CanESM5, CNRM-ESM2-1,
