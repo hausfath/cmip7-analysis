@@ -92,9 +92,16 @@ def main():
     big = sc_used[(sc_used.offset_5yr - off_typ).abs() > 0.5]
     exc_html = ""
     if ("KACE-2-0-G", "placeholder-branch") in exc.index:
-        exc_html += (f"<li>KACE-2-0-G: its {exc['KACE-2-0-G', 'placeholder-branch']} scenario runs give "
+        kc = sc_used[(sc_used.model == "KACE-2-0-G") & (sc_used.rule == "placeholder-branch")]
+        kp = sorted({m.split("i")[0] for m in kc.parent_member})
+        if len(kp) == 1:
+            parent_txt = f"name historical {kp[0]} as parent, so they are joined to it"
+        else:
+            parent_txt = (f"each names the historical run with its own member label ({', '.join(kp)}) as parent, "
+                          "so each is joined to that run")
+        exc_html += (f"<li>KACE-2-0-G: its {len(kc)} scenario runs give "
                      "<code>branch_time_in_parent</code> = 0 (1850), apparently a placeholder. They start in 2022 and "
-                     "name the model's only historical run as parent, so they are joined to it.</li>")
+                     f"{parent_txt}.</li>")
     if ("FGOALS-g3-5", "relabel-same-label") in exc.index:
         fg = sc_used[(sc_used.model == "FGOALS-g3-5") & (sc_used.rule == "relabel-same-label")]
         fy = sorted(fg.first_year_in_file.unique())
@@ -106,12 +113,25 @@ def main():
                      "identifies the true parent. Their 2022–2026 mean is "
                      f"{fg.offset_5yr.mean():+.2f} °C (SD {fg.offset_5yr.std():.2f}) relative to the parent's 2017–2021, "
                      f"close to the {off_typ:+.2f} °C median of all joins.</li>")
+    # the scenario that continues each member in the headline metrics (gmst.py preference m > h > vl)
+    def headline_scen(model, member):
+        have = set(sc_used[(sc_used.model == model) & (sc_used.member == member)].scenario)
+        for suffix in ("m", "h", "vl"):
+            for x in (f"scen7-{suffix}", f"esm-scen7-{suffix}"):
+                if x in have:
+                    return x
+
+    def effect(r):
+        hs = headline_scen(r.model, r.member)
+        if hs == r.scenario:
+            return "so it pulls down the model's 2015–2024 value and early projection years"
+        return (f"so it pulls down the early years of the model's <code>{esc(r.scenario)}</code> projection; the "
+                f"2015–2024 value continues this member with <code>{esc(hs)}</code>")
     big_html = "".join(
         f"<li>{esc(r.model)} <code>{esc(r.scenario)}</code> {esc(r.member)}: its 2022–2026 mean is "
         f"{r.offset_5yr:+.2f} °C relative to its declared parent's 2017–2021 mean, against a median of "
         f"{off_typ:+.2f} °C (SD {off_sd:.2f}) across all {len(sc_used)} joins, although its branch metadata are "
-        "consistent. It is kept under the metadata rule, so it pulls down the model's 2015–2024 value and early "
-        "projection years.</li>" for r in big.itertuples())
+        f"consistent. It is kept under the metadata rule, {effect(r)}.</li>" for r in big.itertuples())
     tls_html = (f"<li>{len(tls)} {esc(', '.join(tls_models))} files were downloaded with TLS certificate checking "
                 f"switched off for {esc(', '.join(tls_hosts))}, whose certificate had expired. All of them match the "
                 "sha256 in the ESGF index.</li>") if len(tls) else ""
@@ -151,6 +171,7 @@ def main():
     split = sorted(t.min()[(t.max() > 1.645) & (t.min() <= 1.645)].index)
     cons = sorted(t.max()[t.max().abs() <= 1.645].index)
     untested = sorted(set(mh.model) - set(t.groups))
+    ctl_siv = sorted(set(mh[(mh.dT_2012_2021_sigma_iv_src == "piControl") & mh.dT_2012_2021_z.notna()].model))
     ts = mh.dropna(subset=["dT_2012_2021_driftcorr_seg_z"]).groupby("model").dT_2012_2021_driftcorr_seg_z
     n_hot_seg = int((ts.min() > 1.645).sum())
     drop_seg = sorted(set(hot_models) & set(ts.groups) - set(ts.min()[ts.min() > 1.645].index))
@@ -449,8 +470,9 @@ ul {{ margin: 0; padding-left: 1.2em; display: grid; gap: 6px; }}
     ECS and TCR come from idealised CO₂ runs and are not affected.</li>
     <li>Emissions-driven runs simulate their own CO₂, so differences between their warming and that of the
     concentration-driven runs partly reflect CO₂.</li>
-    <li>The consistency test assumes realistic model internal variability. For models with 2–3 members it relies on the
-    control run.</li>
+    <li>The consistency test assumes realistic model internal variability. It uses the member spread for models with at
+    least 5 members and the control run for the others{(' (' + esc(', '.join(ctl_siv)) + ')') if ctl_siv else ''}; models with fewer
+    than 5 members and no control run are not tested.</li>
   </ul></div>
 </section>
 

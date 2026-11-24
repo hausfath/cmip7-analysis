@@ -88,7 +88,8 @@ is ongoing daily; every number here is specific to that snapshot and will change
     2022-01-01), but its 2022–2026 mean is 0.65 °C below its parent's 2017–2021 mean (median over all
     joins +0.20 °C, SD 0.10), and its first year is 0.93 °C below the parent's 2021. It is kept under the
     metadata rule. The model is not tested (2 members, no control), but this join lowers its 2015–2024
-    value and the low end of its `esm-scen7-h` range (r4 3.24 vs r1 3.44 °C for 2081–2100).
+    value and the low end of its `esm-scen7-h` range (r4 3.24 vs r1 3.44 °C for 2081–2100). Other r4
+    scenario joins are kept on the same basis.
     `splice_check.csv` has `jump_2021_2022` and `offset_5yr` for every join; the report flags any
     `offset_5yr` more than 0.5 °C from the median.
   - **Stale index checksums.** CanESM5-1 piControl: 8 files (all 4 `tas` files; 2 each of `rsut`, `rlut`) on the

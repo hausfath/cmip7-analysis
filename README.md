@@ -34,6 +34,26 @@ without downloading anything. Steps 1–2 move about 150 GB over ESGF and are re
 change daily, so a fresh step 1 will not reproduce the 2026-11-23 manifest; `inventory/manifest_2026-11-23.csv`
 records exactly what was used.
 
+### Weekly refresh
+
+`scripts/weekly/refresh.sh` runs every Sunday night (launchd) from a separate clone:
+
+1. It rebuilds the manifest and compares it with the last committed one (`scripts/weekly/scan.py`).
+   The scan also lists models that have abrupt-4xCO2 or 1pctCO2 on ESGF but not yet the variables
+   needed for ECS/TCR. If nothing is new, the run stops there.
+2. Otherwise it acquires the new files and reruns steps 4–8.
+3. `scripts/weekly/check.py` then flags anything that needs a person to look at it:
+   - a new model;
+   - withdrawn or re-versioned datasets;
+   - incomplete acquisition or a stale checksum;
+   - a failed area-weighting check;
+   - a scenario join that is not under the metadata rule, or has an unusual offset;
+   - a large change in an existing model's metrics.
+4. Claude, headless and limited to editing README.md and METHODS.md, updates the numbers in those
+   two files and gives a verdict (prompt: `scripts/weekly/claude_prompt.md`).
+5. A clean run is pushed to `main`, which updates the report. Anything else goes to a
+   `weekly-refresh` pull request for review.
+
 fig02b and `cmip6_historical.py` are a descriptive side analysis (CMIP6 models from the
 Hausfather et al. 2022 supporting data, one member each). They are not part of the report.
 
