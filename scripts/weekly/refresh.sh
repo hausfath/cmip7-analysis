@@ -13,7 +13,7 @@
 set -uo pipefail
 
 main() {
-  local AUTO="${CMIP7_AUTO_DIR:-$HOME/cmip7-weekly}"
+  AUTO="${CMIP7_AUTO_DIR:-$HOME/cmip7-weekly}"   # global: the EXIT trap runs after main returns
   local REPO="$AUTO/repo" BR=weekly-refresh DRY=0
   [ "${1:-}" = "--dry-run" ] && DRY=1
   local PY="$REPO/.venv/bin/python"
@@ -25,7 +25,7 @@ main() {
   echo "=== $(date '+%F %T') start (dry-run=$DRY)"
 
   if ! mkdir "$AUTO/lock" 2>/dev/null; then echo "another run holds $AUTO/lock; exiting"; return 0; fi
-  trap 'rmdir "$AUTO/lock"' EXIT
+  trap 'rmdir "${AUTO}/lock" 2>/dev/null' EXIT
   caffeinate -i -w $$ &      # keep the Mac awake while this runs
 
   notify() { osascript -e "display notification \"$1\" with title \"CMIP7 weekly refresh\"" >/dev/null 2>&1 || true
@@ -43,7 +43,13 @@ main() {
     git checkout -q -B "$BR" origin/main || fail "checkout"
   fi
 
-  "$PY" -I scripts/build_manifest.py || fail "manifest query (ESGF index unreachable?)"
+  # Retry while an ESGF index does not respond (intake-esgf then warns that results may be incomplete)
+  for try in 1 2 3; do
+    "$PY" -I scripts/build_manifest.py > "$LOG/manifest.txt" 2>&1 || fail "manifest query (see $LOG/manifest.txt)"
+    tail -1 "$LOG/manifest.txt"
+    grep -q "failed to return a response" "$LOG/manifest.txt" || break
+    echo "an ESGF index did not respond (try $try)"; [ $try -lt 3 ] && sleep 900
+  done
   "$PY" -I scripts/weekly/scan.py "$LOG"; local rc=$?
   if [ $rc -eq 0 ]; then
     git reset -q --hard && git clean -fdq
