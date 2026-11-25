@@ -1,6 +1,6 @@
 # CMIP7 analysis: warming and climate sensitivity (methods)
 
-Status: snapshot of ESGF holdings taken **2026-11-24** (all 3,850 manifest files acquired). CMIP7 publication
+Status: snapshot of ESGF holdings taken **2026-11-25** (all 3,898 manifest files acquired). CMIP7 publication
 is ongoing daily; every number here is specific to that snapshot and will change.
 
 ## 1. Data
@@ -8,7 +8,7 @@ is ongoing daily; every number here is specific to that snapshot and will change
 ### 1.1 CMIP7 model output (ESGF)
 - Discovery: ESGF CMIP7 STAC indexes (`discovery.east.esgf.io`, `discovery.west.esgf.io`) via
   `intake-esgf` 2026.9.28, per the [CMIP7 user guidance](https://wcrp-cmip.github.io/cmip7-guidance/docs/CMIP7/Guidance_for_users/#1-accessing-cmip7-data).
-  Script: `scripts/build_manifest.py` → `inventory/manifest_2026-11-24.csv` (file-level: URLs,
+  Script: `scripts/build_manifest.py` → `inventory/manifest_2026-11-25.csv` (file-level: URLs,
   sizes, sha256 checksums, versions; latest version per dataset only). The east index did not respond
   while this manifest was built (`intake-esgf` warned that results may be incomplete), so any dataset
   listed only there would be missing; no dataset in the previous manifest is missing from this one.
@@ -23,7 +23,7 @@ is ongoing daily; every number here is specific to that snapshot and will change
   `scen7-vl` = "Very Low … limiting warming to 1.5C by the end of the century".
 - Acquisition: `scripts/acquire_global_means.py`. Each file is downloaded over HTTPS (dropped
   connections resume with an HTTP Range request where the node supports it), sha256-verified
-  against the index checksum (3,840 of 3,850 files pass; see stale-index note below), reduced to an area-weighted global mean per month, and deleted. No raw
+  against the index checksum (3,888 of 3,898 files pass; see stale-index note below), reduced to an area-weighted global mean per month, and deleted. No raw
   field is retained (peak raw footprint ≈ workers × one file). Outputs: `derived/monthly/<dataset>/`,
   global attributes in `derived/attrs/`, per-file log in `derived/acquire_log.csv`.
 - TLS: the CAS node `esg-earthlab.iap.ac.cn` served an expired certificate (notAfter 2026-11-22), so
@@ -45,7 +45,7 @@ is ongoing daily; every number here is specific to that snapshot and will change
 | Model | Institution | hist | esm-hist | scen7 (h/m/vl) | esm-scen7 (h/m/vl) | piCtl+4xCO2 rad | 1pctCO2 |
 |---|---|---|---|---|---|---|---|
 | CanESM6-0-MR | CCCma | 25 | 25 | 25/25/25 | 25/25/25 | ✓ | ✓ |
-| CanESM5-1 | CCCma | – | 25 | – | 25/25/25 | ✓ | ✓ |
+| CanESM5-1 | CCCma | 16 | 25 | – | 25/25/25 | ✓ | ✓ |
 | UKESM1-3-LL | UKNCSP | 5 (f2) | 8 | 3/–/3 | 8/7/8 | ✓ | ✓ |
 | UKCM2-0-LL | UKNCSP | 10 | – | –/–/1 | – | ✓ | ✓ |
 | UKCM2a-0-HH | UKNCSP | 3 | – | 2/–/2 | – | ✓ | ✓ |
@@ -257,7 +257,9 @@ was computed.
   to its spurious contribution to 2012–2021 minus 1850–1900 (slope × 141.5 yr) and tested with the same σ:
   - `<metric>_driftcorr`: removes the parent control's **full-record** OLS slope, i.e. the drift itself.
   - `<metric>_driftcorr_seg`: removes each member's **contemporaneous 1850–2021 segment** slope
-    (branch-aligned as §2.2; full-record where the segment is incomplete). Over 172 yr this mixes drift
+    (branch-aligned as §2.2; full-record where the segment is incomplete, as for 8 of the 16 CanESM5-1
+    `historical` members, which branch at control years 6731–6841 while the published piControl `tas`
+    covers 6500–6900). Over 172 yr this mixes drift
     with centennial variability, which the member spread already samples, so it is the weaker test.
   Headline count of models warmer than observed over 2012–2021: 5 of 8 raw, 4 of 7 with the full-record
   correction, 3 of 7 with the segment correction (UKCM2-0-LL drops out). FGOALS-g3-5 has no control
@@ -353,6 +355,6 @@ Descriptive counterpart to fig02 for CMIP6, from the H22 supporting data (Zenodo
 
 ## 4. Citation / data availability (CMIP7 requirements)
 No CMIP7 DOIs had been minted as of the guidance page (2026-09-23). Datasets are cited by DRS id and
-version (`inventory/manifest_2026-11-24.csv`); a source/institution/version table will be generated
+version (`inventory/manifest_2026-11-25.csv`); a source/institution/version table will be generated
 into `outputs/cmip7_dataset_table.csv`. Licence: per-dataset global attribute (CC-BY-4.0 for all files
 inspected). Acknowledgement text per the CMIP7 guidance to be included in any publication.

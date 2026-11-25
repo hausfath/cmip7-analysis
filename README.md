@@ -2,7 +2,7 @@
 
 **Report: <https://hausfath.github.io/cmip7-analysis/>**
 
-A first look at the CMIP7 output published on ESGF as of **2026-11-24**: historical and projected
+A first look at the CMIP7 output published on ESGF as of **2026-11-25**: historical and projected
 global surface air temperature compared with the GSAT ensemble, and effective climate sensitivity
 (ECS) and transient climate response (TCR) compared with CMIP6. CMIP7 publication is ongoing, so every
 number here belongs to that snapshot. Full conventions, checks and caveats are in [METHODS.md](METHODS.md).
@@ -30,8 +30,8 @@ CMIP6 validation data come from the Pangeo cloud archive and need a separate ven
 
 Run every script from the repository root with `.venv/bin/python -I scripts/<name>.py`. Steps 4–8 need
 only the derived files committed here (about 50 MB), so every number, figure and the report regenerate
-without downloading anything. Steps 1–2 move about 152 GB over ESGF and are resumable. ESGF holdings
-change daily, so a fresh step 1 will not reproduce the 2026-11-24 manifest; `inventory/manifest_2026-11-24.csv`
+without downloading anything. Steps 1–2 move about 153 GB over ESGF and are resumable. ESGF holdings
+change daily, so a fresh step 1 will not reproduce the 2026-11-25 manifest; `inventory/manifest_2026-11-25.csv`
 records exactly what was used.
 
 ### Weekly refresh
@@ -59,7 +59,7 @@ Hausfather et al. 2022 supporting data, one member each). They are not part of t
 
 ## Inputs and licences
 
-- CMIP7 model output: ESGF, all 581 datasets CC-BY-4.0. Cite per the
+- CMIP7 model output: ESGF, all 597 datasets CC-BY-4.0. Cite per the
   [CMIP7 terms of use](https://wcrp-cmip.github.io/cmip7-guidance/docs/CMIP7/Guidance_for_users/#2-terms-of-use-and-citations-requirements);
   dataset IDs, versions and tracking IDs are in `outputs/cmip7_dataset_table.csv`.
 - CMIP6 output: Pangeo `gs://cmip6`. The six models used (ACCESS-ESM1-5, CanESM5, CNRM-ESM2-1,
