@@ -120,7 +120,7 @@ def main(logdir):
     def holdings(man):
         t = man[man.variable_id == "tas"].drop_duplicates("dskey")
         return t.groupby(["source_id", "experiment_id"]).variant_label.nunique()
-    m0 = pd.read_csv(ROOT / scan["baseline_manifest"])
+    m0 = head_csv("inventory/manifest_latest.csv")
     h1, h0 = holdings(m), holdings(m0)
     hd = pd.concat([h0.rename("before"), h1.rename("after")], axis=1).fillna(0).astype(int)
     diffs["holdings_changed"] = hd[hd.before != hd.after].reset_index().to_dict("records")

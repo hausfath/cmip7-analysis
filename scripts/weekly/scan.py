@@ -1,7 +1,8 @@
 """Weekly refresh, stage 1: compare a fresh ESGF manifest with the last committed one.
 
 Run after scripts/build_manifest.py has written inventory/manifest_<today>.csv.
-The baseline is the newest dated manifest in the last commit (git HEAD).
+The baseline is inventory/manifest_latest.csv as of the last commit (git HEAD), so a
+second run on the same day compares against what the first one published.
 
 Also lists models that have DECK idealised runs (abrupt-4xCO2 / 1pctCO2) on ESGF
 but not yet the variables needed for ECS/TCR (tas + rsdt/rsut/rlut in abrupt-4xCO2
@@ -10,7 +11,7 @@ and piControl), so partly published models are visible before they become usable
 Writes <logdir>/scan.json. Exit code 0 = nothing new, 10 = new or changed files.
 Usage: python -I scripts/weekly/scan.py <logdir>
 """
-import json, pathlib, subprocess, sys
+import io, json, pathlib, subprocess, sys
 import pandas as pd
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
@@ -19,10 +20,10 @@ NEED_TAS = ("tas", "tavg-h2m-hxy-u")
 NEED_RAD = {("rsdt", "tavg-u-hxy-u"), ("rsut", "tavg-u-hxy-u"), ("rlut", "tavg-u-hxy-u")}
 
 
-def committed_manifests():
-    out = subprocess.run(["git", "ls-tree", "--name-only", "HEAD", "inventory/"], cwd=ROOT,
-                         capture_output=True, text=True, check=True).stdout.split()
-    return sorted(p for p in out if pathlib.Path(p).name.startswith("manifest_20"))
+def committed_manifest():
+    out = subprocess.run(["git", "show", "HEAD:inventory/manifest_latest.csv"], cwd=ROOT,
+                         capture_output=True, text=True, check=True).stdout
+    return pd.read_csv(io.StringIO(out))
 
 
 def deck_coverage():
@@ -51,9 +52,9 @@ def main(logdir):
     logdir.mkdir(parents=True, exist_ok=True)
     dated = sorted(INV.glob("manifest_20*.csv"))
     new_path = dated[-1]
-    base_rel = [p for p in committed_manifests() if pathlib.Path(p).name != new_path.name][-1]
+    base_rel = "HEAD:inventory/manifest_latest.csv"
     new = pd.read_csv(new_path)
-    base = pd.read_csv(ROOT / base_rel)
+    base = committed_manifest()
 
     ds_new = new.groupby("dskey").agg(version=("version", "first"), source_id=("source_id", "first"),
                                       experiment_id=("experiment_id", "first"), variable_id=("variable_id", "first"))
