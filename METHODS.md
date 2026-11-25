@@ -9,9 +9,8 @@ is ongoing daily; every number here is specific to that snapshot and will change
 - Discovery: ESGF CMIP7 STAC indexes (`discovery.east.esgf.io`, `discovery.west.esgf.io`) via
   `intake-esgf` 2026.9.28, per the [CMIP7 user guidance](https://wcrp-cmip.github.io/cmip7-guidance/docs/CMIP7/Guidance_for_users/#1-accessing-cmip7-data).
   Script: `scripts/build_manifest.py` → `inventory/manifest_2026-11-25.csv` (file-level: URLs,
-  sizes, sha256 checksums, versions; latest version per dataset only). The east index did not respond
-  while this manifest was built (`intake-esgf` warned that results may be incomplete), so any dataset
-  listed only there would be missing; no dataset in the previous manifest is missing from this one.
+  sizes, sha256 checksums, versions; latest version per dataset only). Both indexes responded when this
+  manifest was built, and no dataset in the previous manifest is missing from this one.
 - Branded variables: `tas_tavg-h2m-hxy-u` (monthly, region `glb`); `rsdt`, `rsut`, `rlut`
   `_tavg-u-hxy-u` (monthly) for piControl and abrupt-4xCO2. Sub-monthly output is not used:
   CAS-ESM2-1-CSM `scen7-vl` publishes `tas` only as 3-hourly fields, so it is absent here.
