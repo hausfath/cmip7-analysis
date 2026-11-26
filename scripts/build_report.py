@@ -31,7 +31,8 @@ def esc(s):
 
 
 def table(head, rows, cls=""):
-    th = "".join(f"<th>{h}</th>" for h in head)
+    nb = lambda h: h.replace("W m⁻²", "W\u00a0m⁻²").replace("m⁻² °C⁻¹", "m⁻²\u00a0°C⁻¹")  # keep units on one line
+    th = "".join(f"<th>{nb(h)}</th>" for h in head)
     tr = "".join("<tr>" + "".join(f"<td>{c}</td>" for c in r) + "</tr>" for r in rows)
     return f'<div class="tw"><table class="{cls}"><thead><tr>{th}</tr></thead><tbody>{tr}</tbody></table></div>'
 
@@ -204,7 +205,7 @@ def main():
             f"{esc(r.predecessor)}", f2(r.pred_ECS), f2(r.pred_TCR),
             f"<span class='chip {'lo' if r.ECS_change == 'lower' else ('hi' if r.ECS_change == 'higher' else 'nc')}'>"
             f"{f2(r.dECS, 2) if np.isfinite(r.dECS) else '–'}</span>"])
-    sens_tab = table(["CMIP7 model", "Member", "ECS (5–95%)", "ECS yr 21–150", "ERF₂ₓ", "λ", "TCR",
+    sens_tab = table(["CMIP7 model", "Member", "ECS (5–95%)", "ECS yr 21–150", "ERF₂ₓ (W m⁻²)", "λ (W m⁻² °C⁻¹)", "TCR",
                       "CMIP6 predecessor", "ECS", "TCR", "ΔECS"], sens_rows, "num")
 
     val_rows = []
@@ -380,7 +381,7 @@ figcaption {{ font-size: 0.9rem; color: var(--ink-2); max-width: 90ch; }}
 .tw {{ overflow-x: auto; border: 1px solid var(--rule); border-radius: 6px; background: var(--surface); }}
 table {{ border-collapse: collapse; width: 100%; font-size: 0.86rem; }}
 th, td {{ padding: 7px 10px; text-align: left; border-bottom: 1px solid var(--rule); white-space: nowrap; vertical-align: top; }}
-th {{ font: 500 0.74rem/1.3 var(--mono); text-transform: uppercase; letter-spacing: 0.04em; color: var(--ink-3);
+th {{ font: 500 0.74rem/1.3 var(--mono); letter-spacing: 0.02em; color: var(--ink-3);
   background: var(--bg); white-space: normal; min-width: 60px; }}
 tbody tr:last-child td {{ border-bottom: 0; }}
 table.num td {{ font-variant-numeric: tabular-nums; }}
@@ -452,7 +453,7 @@ ul {{ margin: 0; padding-left: 1.2em; display: grid; gap: 6px; }}
   </div>
   {figure("fig04_ecs_tcr_vs_cmip6", "ECS and TCR for each CMIP7 model (blue) with its CMIP6 predecessor (hollow) and the CMIP6 distribution (grey). Shading: AR6 likely and very likely ranges; dashed line: AR6 best estimate.")}
   {sens_tab}
-  <p class="note">ECS range: fixed-design circular block bootstrap of the regression residuals (10-yr blocks, 2,000
+  <p class="note">λ = −ERF₂ₓ/ECS, the net climate feedback parameter. ECS range: fixed-design circular block bootstrap of the regression residuals (10-yr blocks, 2,000
   resamples); it reflects regression sampling only. "ECS yr 21–150" is the fit excluding the first 20 years; it is larger
   for {n_late_larger} of {n7} models, the usual pattern-effect curvature. ΔECS is coloured only when the two models' 5–95% ranges do not
   overlap. The ranges come from one realisation each and exclude realisation-to-realisation spread in ECS, so they
