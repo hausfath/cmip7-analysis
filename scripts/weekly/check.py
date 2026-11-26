@@ -17,7 +17,7 @@ COSLAT_EXCEPTIONS = {"FGOALS-g3-5"}
 COSLAT_TOL = 0.02          # K or W m-2; all other models are <= 0.011
 OFFSET_TOL = 0.5           # degC from the median offset_5yr over all joins
 # Changes to existing rows large enough to need a look
-TOL = {"ECS_rm21": 0.2, "dT_2012_2021": 0.1, "dT_2081_2100": 0.3}
+TOL = {"ECS_rm21": 0.2, "dT_2012_2021": 0.1, "dT_2081_2100": 0.3, "rate_2005_2019": 0.1}
 # Join rules other than "metadata" that were accepted for one model (METHODS §1.1); new runs of
 # that model under the same rule are reported as notes, any other model needs review
 ACCEPTED_RULES = {("FGOALS-g3-5", "relabel-same-label"), ("KACE-2-0-G", "placeholder-branch")}
@@ -102,8 +102,12 @@ def main(logdir):
     # 5. Metric tables: new models need review; large changes to existing rows need review
     for f, k, col in [("cmip7_sensitivity.csv", ["model", "member"], "ECS_rm21"),
                       ("historical_metrics.csv", ["model", "track"], "dT_2012_2021"),
-                      ("projection_metrics.csv", ["model", "scenario"], "dT_2081_2100")]:
+                      ("projection_metrics.csv", ["model", "scenario"], "dT_2081_2100"),
+                      ("eei_metrics.csv", ["model", "track"], "rate_2005_2019")]:
         a, b = pd.read_csv(OUT / f), head_csv(f"outputs/{f}")
+        if b is None:   # table not yet in the last commit
+            notes.append(f"{f} is new in this run.")
+            continue
         new_models = sorted(set(a.model) - set(b.model))
         if new_models and f != "projection_metrics.csv":
             reasons.append(f"{f}: model(s) appear for the first time: {', '.join(new_models)}.")

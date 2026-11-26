@@ -23,16 +23,19 @@ CMIP6 validation data come from the Pangeo cloud archive and need a separate ven
 | 4. ECS / TCR; CMIP6 first, as a check against published values | `scripts/sensitivity.py cmip6`, then `cmip7` | `outputs/cmip6_sensitivity.csv`, `outputs/cmip7_sensitivity.csv`, `derived/gregory/` |
 | 5. Historical and projected GSAT vs the GSAT ensemble | `scripts/gmst.py` (obs from `data/obs/`; `--obs <file>` rebuilds it from the full ensemble) | `derived/gmst/`, `outputs/historical_metrics.csv`, `projection_metrics.csv`, `splice_*.csv`, `drift_check.csv` |
 | 5b. CMIP6 historical metrics from the H22 supporting data (descriptive) | `scripts/cmip6_historical.py` | `outputs/cmip6_historical_metrics.csv`, `cmip6_splice_sensitivity.csv`, `cmip6_h22_checks.txt` |
-| 6. Figures | `scripts/figures_gmst.py`, `scripts/figures_sensitivity.py` | `figures/fig01–fig06`, `fig02b` (PNG + PDF), `outputs/lineage_pairs.csv` |
+| 5c. Earth's energy imbalance vs observations (obs inputs vendored once by `scripts/obs_eei.py`) | `scripts/eei.py` | `derived/eei/`, `outputs/eei_metrics.csv`, `eei_obs.csv`, `eei_tests.csv`, `eei_control.csv`, `eei_sensitivity.csv` |
+| 6. Figures | `scripts/figures_gmst.py`, `scripts/figures_sensitivity.py`, `scripts/figures_eei.py` | `figures/fig01–fig08`, `fig02b` (PNG + PDF), `outputs/lineage_pairs.csv` |
 | 7. Dataset citation table | `scripts/dataset_table.py` | `outputs/cmip7_dataset_table.csv` |
 | 8. Report (GitHub Pages) | `scripts/build_report.py` | `docs/index.html`, `docs/figures/` |
 | One-off | `scripts/oneoff_esmhist_scen7m.py`: every emissions-driven run to 2026 vs observations (not in the report) | `figures/oneoff_esmhist_scen7m` |
 
 Run every script from the repository root with `.venv/bin/python -I scripts/<name>.py`. Steps 4–8 need
-only the derived files committed here (about 50 MB), so every number, figure and the report regenerate
-without downloading anything. Steps 1–2 move about 153 GB over ESGF and are resumable. ESGF holdings
+only the derived files committed here (about 130 MB), so every number, figure and the report regenerate
+without downloading anything. Steps 1–2 move about 361 GB over ESGF and are resumable. ESGF holdings
 change daily, so a fresh step 1 will not reproduce the 2026-11-25 manifest; `inventory/manifest_2026-11-25.csv`
-records exactly what was used.
+records exactly what was used. That file was rebuilt on 2026-11-25, after the GSAT, ECS and TCR results were first published,
+to add 4,829 radiation files (rsdt, rsut, rlut) for the energy imbalance section; the 3,898 files used for
+those first results are unchanged in it (same versions and checksums).
 
 ### Weekly refresh
 
@@ -59,7 +62,7 @@ Hausfather et al. 2022 supporting data, one member each). They are not part of t
 
 ## Inputs and licences
 
-- CMIP7 model output: ESGF, all 597 datasets CC-BY-4.0. Cite per the
+- CMIP7 model output: ESGF, all 2,192 datasets CC-BY-4.0. Cite per the
   [CMIP7 terms of use](https://wcrp-cmip.github.io/cmip7-guidance/docs/CMIP7/Guidance_for_users/#2-terms-of-use-and-citations-requirements);
   dataset IDs, versions and tracking IDs are in `outputs/cmip7_dataset_table.csv`.
 - CMIP6 output: Pangeo `gs://cmip6`. The six models used (ACCESS-ESM1-5, CanESM5, CNRM-ESM2-1,
@@ -68,6 +71,10 @@ Hausfather et al. 2022 supporting data, one member each). They are not part of t
 - CMIP7 experiment definitions in `reference/cmip7_cv/`: WCRP CVs (CC BY 4.0).
 - Observations: summary statistics of a 10,000-member GSAT ensemble (`data/obs/`; see METHODS §1.2).
   The full ensemble is not public; its component datasets keep their own licences.
+- Energy imbalance observations (`data/obs/eei/`, annual series derived from the sources): Wu et al. 2025
+  (Zenodo 15395211, CC BY 4.0), Minière et al. 2026 (Zenodo 18485246, CC BY 4.0), Hakuba et al. 2021
+  (Zenodo 5104970, "other-open"; three published values), CERES EBAF-TOA Ed4.2.1 (NASA Langley ASDC,
+  freely available with citation).
 - CMIP6 reference ECS/TCR and CMIP6 historical/SSP global-mean temperature series: Hausfather et al. (2022) supporting data,
   [Zenodo 6476375](https://zenodo.org/records/6476375); Zelinka et al. (2020) v2.2,
   [GitHub](https://github.com/mzelinka/cmip56_forcing_feedback_ecs) (no licence file, so `sensitivity.py`

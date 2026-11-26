@@ -69,7 +69,7 @@ main() {
     tail -3 "$LOG/acquire_$pass.txt"
     "$PY" -I scripts/status.py | grep -q "all complete" && break
   done
-  for s in "sensitivity.py cmip7" gmst.py figures_gmst.py figures_sensitivity.py dataset_table.py build_report.py; do
+  for s in "sensitivity.py cmip7" gmst.py eei.py figures_gmst.py figures_sensitivity.py figures_eei.py dataset_table.py build_report.py; do
     echo "--- $s"; "$PY" -I scripts/$s > "$LOG/step_${s%% *}.txt" 2>&1 || { STEPFAIL="scripts/$s failed (see $LOG/step_${s%% *}.txt)"; break; }
   done
   "$PY" -I scripts/weekly/check.py "$LOG" || STEPFAIL="${STEPFAIL:-check.py failed}"

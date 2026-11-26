@@ -243,6 +243,72 @@ def main():
                           f"{f2(r.dT_2081_2100)} <span class='rng'>{f2(r.dT_2081_2100_min)}–{f2(r.dT_2081_2100_max)}</span>"])
     proj_tab = table(["Model", "Scenario", "n", "2041–2060 (°C)", "2081–2100 (°C)"], proj_rows, "num")
 
+    # ---- Earth's energy imbalance (scripts/eei.py)
+    em = pd.read_csv(OUT / "eei_metrics.csv")
+    eo = pd.read_csv(OUT / "eei_obs.csv")
+    et = pd.read_csv(OUT / "eei_tests.csv")
+    ec = pd.read_csv(OUT / "eei_control.csv")
+    ov = eo.set_index(["source", "metric"])
+    eei_models = sorted(em.model.unique())
+    eei_excl = sorted(set(mh.model) - set(eei_models))
+    ev = et.drop_duplicates(["model", "track", "metric"])
+
+    def eei_count(metric, word):
+        """Run sets (model x track) with this verdict: count, total, names."""
+        g = ev[ev.metric == metric]
+        hit = g[g.verdict == word]
+        return len(hit), len(g), [f"{m} {TRACK[t].lower()}" for m, t in zip(hit.model, hit.track)]
+    lo19, n19, lo19_m = eei_count("rate_2005_2019", "lower than all tested")
+    hi19, _, hi19_m = eei_count("rate_2005_2019", "higher than all tested")
+    lo24, n24, lo24_m = eei_count("rate_2015_2024", "lower than all tested")
+    hi24, _, hi24_m = eei_count("rate_2015_2024", "higher than all tested")
+    loch, nch, loch_m = eei_count("change", "lower than all tested")
+    hich, _, hich_m = eei_count("change", "higher than all tested")
+    def single(metric, src):
+        """Ensembles beyond z = ±Z against one estimate alone: (n below, n above, total)."""
+        g = et[(et.metric == metric) & (et.obs == src)]
+        return int((g.z < -1.645).sum()), int((g.z > 1.645).sum()), len(g)
+    ch_ce_lo, ch_ce_hi, ch_ce_n = single("change", "ceres")
+    ch_mi_lo, ch_mi_hi, _ = single("change", "miniere")
+    ch_ce_out = sorted(f"{m} {TRACK[t].lower()}" for m, t, z in
+                       et[(et.metric == "change") & (et.obs == "ceres")][["model", "track", "z"]].itertuples(index=False) if z >= -1.645)
+    hi24_rng = em.set_index(["model", "track"]).rate_2015_2024
+    hi24_vals = [hi24_rng[(m, t)] for m, t in zip(ev[(ev.metric == "rate_2015_2024") & (ev.verdict == "higher than all tested")].model,
+                                                   ev[(ev.metric == "rate_2015_2024") & (ev.verdict == "higher than all tested")].track)]
+    m19 = ev[ev.metric == "rate_2005_2019"]
+    m19_ok = m19.model.nunique() - m19[m19.verdict != "consistent with at least one"].model.nunique()
+    # sensitivities: largest shift of a run-set mean or an observational estimate from the main choice
+    es = pd.read_csv(OUT / "eei_sensitivity.csv")
+    em_i = em.set_index(["model", "track"])
+    def sens_shift(variant):
+        d = es[(es.variant == variant) & (es.kind == "model")].set_index(["model", "track"])
+        return max(abs(d[k] - em_i.loc[d.index, k]).max() for k in ["rate_2005_2019", "rate_2015_2024", "change"])
+    def obs_shift(variant):
+        d = es[(es.variant == variant) & (es.kind == "obs")].set_index(["source", "metric"])
+        return abs(d.value - ov.loc[d.index, "value"]).max()
+    leak = ec.dropna(subset=["control_mean_N"]).groupby(["model", "control"]).control_mean_N.first()
+    def ob(src, met):
+        return ov.loc[(src, met), "value"] if (src, met) in ov.index else np.nan
+    def names(ms):
+        return f" ({esc(', '.join(ms))})" if ms else ""
+    eei_rows = []
+    for _, r in em.sort_values(["model", "track"]).iterrows():
+        def cell(k, d=2):
+            if not np.isfinite(r[k]):
+                return "–"
+            neg = lambda x: f2(x, d).replace("-", "−")
+            rng = f" ({neg(r[k + '_min'])} to {neg(r[k + '_max'])})" if r[k + "_n"] > 1 else ""
+            nn = f", n={int(r[k + '_n'])}" if r[k + "_n"] != r.n_members else ""
+            return f"{neg(r[k])}{rng}{nn}"
+        short = {"consistent with at least one": "consistent", "lower than all tested": "lower", "higher than all tested": "higher"}
+        verd = {m: short.get(v, v) for m in ["rate_2005_2019", "rate_2015_2024", "change"]
+                for v in [(ev[(ev.model == r.model) & (ev.track == r.track) & (ev.metric == m)].verdict.tolist() or ["–"])[0]]}
+        eei_rows.append([f"<b>{esc(r.model)}</b>", TRACK[r.track].split("-")[0], int(r.n_members), cell("rate_2005_2019"),
+                         esc(verd["rate_2005_2019"]), cell("rate_2015_2024"), esc(verd["rate_2015_2024"]),
+                         cell("change"), esc(verd["change"])])
+    eei_tab = table(["Model", "Track", "n", "2005–2019 (W m⁻²)", "Test", "2015–2024 (W m⁻²)", "Test",
+                     "Change (W m⁻²)", "Test"], eei_rows, "num")
+
     hold = []
     for src, g in dst.groupby("source_id"):
         def n(e, var="tas"):
@@ -343,7 +409,7 @@ ul {{ margin: 0; padding-left: 1.2em; display: grid; gap: 6px; }}
   small ({n_ukcaau} of {n_models} models on ESGF are from UK, Canadian and Australian centres), so these are model-by-model results, not an ensemble
   assessment.{esc(pend_txt)}</p>
   <div class="meta"><span>{n_used} models analysed ({n_models} on ESGF)</span><span>{n_files:,} files · {gb:.0f} GB streamed</span>
-  <span>{len(dst)} datasets · all CC-BY-4.0</span><span>temperatures in °C vs 1850–1900</span>
+  <span>{len(dst):,} datasets · all CC-BY-4.0</span><span>temperatures in °C vs 1850–1900</span>
   <span><a href="{REPO}">Code and data</a></span></div>
 </header>
 
@@ -431,6 +497,52 @@ ul {{ margin: 0; padding-left: 1.2em; display: grid; gap: 6px; }}
   projection range.</p></div>
   {figure("fig03_projections", "One panel per model: ensemble-mean tas by scenario (colour), concentration-driven solid and emissions-driven dashed; shading is the member range.")}
   {proj_tab}
+</section>
+
+<section>
+  <h2>Earth's energy imbalance</h2>
+  <div class="prose">
+    <p>Model energy imbalance is the net top-of-atmosphere flux (<code>rsdt − rsut − rlut</code>) of the concentration- and
+    emissions-driven historical runs, continued to 2024 with the same scenario joins as above. Most models do not conserve
+    energy exactly, so each member has the linear fit to its control run's net flux removed at the contemporaneous control
+    years. That correction is mostly a constant leak: control-run mean net flux ranges from {f2(leak.min()).replace("-", "−")} to
+    {f2(leak.max())} W m⁻² across the {len(eei_models)} models with published control radiation. Without control radiation,
+    {esc(', '.join(eei_excl)) or 'none'} {'is' if len(eei_excl) == 1 else 'are'} not analysed.</p>
+    <p>The observational estimates are rates of heat gain per m² of Earth's surface. For the ocean heat content records
+    (<a href="https://doi.org/10.1073/pnas.2408839122">Wu et al. 2025</a>, 72 members;
+    <a href="https://doi.org/10.5194/essd-2026-106">Minière et al. 2026</a>, preprint, {int(ov.loc[("miniere", "rate_2005_2019"), "n"])} products),
+    the 0–2000 m rate is an OLS slope over the window, the ocean below 2000 m adds 0.06 W m⁻² from 1992 and the total is
+    divided by the ocean's 89% share of Earth's heat gain (<a href="https://doi.org/10.5194/essd-15-1675-2023">von Schuckmann et al. 2023</a>).
+    <a href="https://doi.org/10.1029/2021GL093624">Hakuba et al. (2021)</a> is used as published. Models are compared with
+    these through the OLS slope of their cumulative heat, the same estimator. CERES EBAF window means are shown for
+    reference: their level is set to an in-situ ocean heating value for July 2005–June 2015
+    (<a href="https://doi.org/10.1175/JCLI-D-17-0208.1">Loeb et al. 2018</a>), so they are not tested as an independent
+    level, but the change between windows is independent of that anchor and is tested.</p>
+    <p>For 2005–2019 the estimates are {f2(ob("wu", "rate_2005_2019"))} (Wu), {f2(ob("miniere", "rate_2005_2019"))} (Minière),
+    {f2(ob("hakuba_hydrography", "rate_2005_2019"))} and {f2(ob("hakuba_geodetic", "rate_2005_2019"))} (Hakuba,
+    hydrographic and geodetic) W m⁻²; CERES averages {f2(ob("ceres", "mean_2005_2019"))}. {n19 - lo19 - hi19} of {n19}
+    model ensembles ({m19_ok} of {m19.model.nunique()} models) agree with at least one{f"; {lo19} {'is' if lo19 == 1 else 'are'} lower than all{names(lo19_m)}" if lo19 else ""}{f"; {hi19} higher than all{names(hi19_m)}" if hi19 else ""}.
+    For 2015–2024, Minière gives {f2(ob("miniere", "rate_2015_2024"))} and CERES {f2(ob("ceres", "mean_2015_2024"))} W m⁻²;
+    {n24 - lo24 - hi24} of {n24} ensembles with runs to 2024 agree with Minière, the only tested estimate for this window{f"; {lo24} {'is' if lo24 == 1 else 'are'} lower{names(lo24_m)}" if lo24 else ""}{f"; {hi24} {'is' if hi24 == 1 else 'are'} higher{names(hi24_m)}" if hi24 else ""}{" but below the untested CERES level" if hi24 and max(hi24_vals) < ob("ceres", "mean_2015_2024") else ""}.
+    The increase from 2005–2014 to 2015–2024 is {f2(ob("ceres", "change"))} W m⁻² in CERES and
+    {f2(ob("miniere", "change"))} in Minière; {loch} of {nch} ensembles gain less than both{names(loch_m)}{f" and {hich} more than both{names(hich_m)}" if hich else ""}.
+    Taken one estimate at a time, the answers differ: {ch_ce_lo} of {ch_ce_n} ensembles gain less than CERES at the 5% level{f" (all but {esc(', '.join(ch_ce_out))})" if ch_ce_out else ""},
+    while {'none' if ch_mi_lo + ch_mi_hi == 0 else ch_mi_lo + ch_mi_hi} differ{'s' if ch_mi_lo + ch_mi_hi == 1 else ''} from Minière. The CERES test counts only model internal
+    variability (σ_obs = 0, instrument stability not included), so it is the stricter of the two.</p>
+    <p>A model differs from an estimate if |z| &gt; 1.645, with σ combining the estimate's uncertainty and internal
+    variability of the same statistic in the model's control run, σ_iv²(1 + 1/n). It is reported as lower or higher only
+    if it differs, in the same direction, from every tested estimate for that window (in the table, "consistent" means it
+    agrees with at least one). An ensemble is one model's concentration- or emissions-driven runs.</p>
+  </div>
+  {figure("fig07_eei_timeseries", "Energy imbalance over centred 10-yr windows for each model (blue: concentration-driven, orange dashed: emissions-driven; shading: member range) with ocean-heat-based estimates (Wu, Minière) and CERES EBAF.")}
+  {figure("fig08_eei_windows", "Energy imbalance for 2005–2019 and 2015–2024 and the change between 2005–2014 and 2015–2024: model ensemble means and members against observational estimates.")}
+  {eei_tab}
+  <p class="note">Sensitivities in <code>outputs/eei_sensitivity.csv</code> (largest shift from the main choice): control
+  mean ({f2(sens_shift("control_mean"))} W m⁻²) or quadratic fit ({f2(sens_shift("control_quadratic"))}) instead of the
+  linear fit; 91% instead of 89% ocean share (AR6; {f2(obs_shift("f_ocean_0.91"))}); Minière's quasi-global mask
+  (60°S–60°N, excluding water shallower than 300 m) instead of each product's native domain ({f2(obs_shift("miniere_GCOS_mask"))}).
+  Where fewer members reach 2024 than the full ensemble, the table gives n for that window. The ±0.03 W m⁻² deep-ocean
+  uncertainty is taken as 1σ, the wider reading.</p>
 </section>
 
 <section>

@@ -1,6 +1,6 @@
 # CMIP7 analysis: warming and climate sensitivity (methods)
 
-Status: snapshot of ESGF holdings taken **2026-11-25** (all 3,898 manifest files acquired). CMIP7 publication
+Status: snapshot of ESGF holdings taken **2026-11-25** (all 8,727 manifest files acquired). CMIP7 publication
 is ongoing daily; every number here is specific to that snapshot and will change.
 
 ## 1. Data
@@ -11,8 +11,11 @@ is ongoing daily; every number here is specific to that snapshot and will change
   Script: `scripts/build_manifest.py` → `inventory/manifest_2026-11-25.csv` (file-level: URLs,
   sizes, sha256 checksums, versions; latest version per dataset only). Both indexes responded when this
   manifest was built, and no dataset in the previous manifest is missing from this one.
+  The manifest was rebuilt the same day to add the radiation files for §2.10 (4,829 files); the 3,898
+  tas and ECS radiation files in the first build are unchanged (same versions and checksums).
 - Branded variables: `tas_tavg-h2m-hxy-u` (monthly, region `glb`); `rsdt`, `rsut`, `rlut`
-  `_tavg-u-hxy-u` (monthly) for piControl and abrupt-4xCO2. Sub-monthly output is not used:
+  `_tavg-u-hxy-u` (monthly) for piControl and abrupt-4xCO2 (ECS) and for historical, esm-hist,
+  esm-piControl and the scen7/esm-scen7 files that start by 2024 (energy imbalance, §2.10). Sub-monthly output is not used:
   CAS-ESM2-1-CSM `scen7-vl` publishes `tas` only as 3-hourly fields, so it is absent here.
 - Experiments: `historical`, `esm-hist`, `piControl`, `esm-piControl`, `abrupt-4xCO2`, `1pctCO2`,
   and all ScenarioMIP `scen7-*` / `esm-scen7-*` Tier-1 scenarios (only h, m, vl published so far).
@@ -22,7 +25,7 @@ is ongoing daily; every number here is specific to that snapshot and will change
   `scen7-vl` = "Very Low … limiting warming to 1.5C by the end of the century".
 - Acquisition: `scripts/acquire_global_means.py`. Each file is downloaded over HTTPS (dropped
   connections resume with an HTTP Range request where the node supports it), sha256-verified
-  against the index checksum (3,888 of 3,898 files pass; see stale-index note below), reduced to an area-weighted global mean per month, and deleted. No raw
+  against the index checksum (8,714 of 8,727 files pass; see stale-index note below), reduced to an area-weighted global mean per month, and deleted. No raw
   field is retained (peak raw footprint ≈ workers × one file). Outputs: `derived/monthly/<dataset>/`,
   global attributes in `derived/attrs/`, per-file log in `derived/acquire_log.csv`.
 - TLS: the CAS node `esg-earthlab.iap.ac.cn` served an expired certificate (notAfter 2026-11-22), so
@@ -102,9 +105,9 @@ is ongoing daily; every number here is specific to that snapshot and will change
     readable, and contiguous (1,200 months per file), but neither size nor sha256 matches the ESGF index.
     Accepted with `--accept-stale` and logged as `ok-stale` in `derived/acquire_log.csv`. CanESM5-1 ECS
     therefore rests on the server copy of its piControl, which cannot be checksum-verified. The
-    KACE-2-0-G `historical` r1 and `scen7-vl` r1 files (one each) are in the same state (size equals the server
-    `Content-Length`, sha256 differs from the index); their global means are complete and contiguous
-    (2,064 months, 1850–2021; 948 months, 2022–2100). Worth
+    KACE-2-0-G `historical` r1 `tas` file and its four `scen7-vl` r1 files (`tas`, `rsdt`, `rsut`, `rlut`) are in
+    the same state (size equals the server `Content-Length`, sha256 differs from the index); their global means
+    are complete and contiguous (2,064 months, 1850–2021; 948 months, 2022–2100). Worth
     reporting to CCCma, NIMS-KMA / [ESGF errata](https://errata.esgf.io/).
   - **Scenario parents are matched by metadata, not variant label.** UKESM1-3-LL `esm-scen7-*` r7/r8
     and `scen7-h`/`scen7-vl` r2 are `…f1` but declare an f2 parent (`esm-hist r7i1p1f2`/`r8i1p1f2`,
@@ -144,6 +147,29 @@ is ongoing daily; every number here is specific to that snapshot and will change
 - Pangeo time units can differ between variables of the same run (CanESM5 r1i1p1f1 abrupt-4xCO2 `tas`
   uses `hours since 1850-01-16 12:00`; its radiation stores use `days since 1850-01-01`). Units are
   therefore stored per variable (`time_units_<var>`).
+- **Energy imbalance observations** (`data/obs/eei/`, built by `scripts/obs_eei.py` from the downloaded
+  sources; raw files not kept):
+  - Wu, Gregory, Zanna & Khatiwala (2025, PNAS, [10.1073/pnas.2408839122](https://doi.org/10.1073/pnas.2408839122)),
+    Zenodo [15395211](https://doi.org/10.5281/zenodo.15395211) (CC BY 4.0; the latest version of the record
+    11107298): annual 0–2000 m global ocean heat content, 72 members, 1870–2020 (`gohc`, ZJ), and the
+    authors' 20-yr energy imbalance `Nm`/`Nd` (validation only). The earlier record's `dohu_dt` is a
+    20-yr running trend of the 0–2000 m layer, not an annual full-depth value, so it is not used.
+  - Minière, von Schuckmann & Speich (2026, ESSD Discussions,
+    [10.5194/essd-2026-106](https://doi.org/10.5194/essd-2026-106), preprint), Zenodo
+    [18485246](https://doi.org/10.5281/zenodo.18485246) (CC BY 4.0): monthly 0–2000 m global ocean heat
+    content from 13 gridded products (EN4 once; its four XBT-correction variants are not used), annual
+    means of complete years only. Primary: each product's native ocean domain (`no_mask`), the basis of
+    the paper's 2005–2020 headline; sensitivity: their reference mask (60°S–60°N, deeper than 300 m),
+    which excludes heat gain the models include.
+  - Hakuba, Frederikse & Landerer (2021, GRL, [10.1029/2021GL093624](https://doi.org/10.1029/2021GL093624)),
+    Zenodo [5104970](https://doi.org/10.5281/zenodo.5104970): published energy imbalance and 5–95 % for
+    2005–2019 from hydrography (0.76) and from sea level minus ocean mass (0.94 W m⁻², the abstract value),
+    `trends_global.xlsx`. Their non-ocean and deep terms are already included.
+  - CERES EBAF-TOA Ed4.2.1 global monthly net flux (ceres-tool.larc.nasa.gov), annual means 2001–2025.
+    Its net flux was adjusted once so that July 2005–June 2015 matches an in-situ ocean heating value of
+    0.71 W m⁻² ([Loeb et al. 2018](https://doi.org/10.1175/JCLI-D-17-0208.1)), kept in Ed4.2 (Data
+    Quality Summary V6). Its level is therefore not independent of the ocean heat estimates; its
+    changes are.
 
 ### 1.3 CMIP6 reference values
 - Primary: Hausfather, Marvel, Schmidt, Nielsen-Gammon & Zelinka (2022), *Nature* 605, 26–29,
@@ -335,6 +361,50 @@ Descriptive counterpart to fig02 for CMIP6, from the H22 supporting data (Zenodo
   member against CMIP7 member means, and CMIP6 vs CMIP7 historical forcing.
 - Outputs: `outputs/cmip6_historical_metrics.csv` (obs row copied from `historical_metrics.csv`),
   `outputs/cmip6_splice_sensitivity.csv`, `outputs/cmip6_h22_checks.txt`.
+
+### 2.10 Earth's energy imbalance (`scripts/eei.py`, fig07–fig08)
+- Model EEI: net TOA flux N = rsdt − rsut − rlut (global, annual, W m⁻²) for every member of historical
+  and esm-hist with all three variables, continued to 2024 with the scenario member used for GSAT
+  (`splice_check.csv`, preference m > h > vl). Members without scenario radiation end in 2021.
+- Control correction: the OLS line fitted to the full control N record (historical → piControl,
+  esm-hist → esm-piControl; the member named as parent, else the first) is subtracted at each member's
+  contemporaneous control years (§2.2 branch year). The correction is almost entirely a constant energy
+  leak; per-model control means and slopes are in `outputs/eei_control.csv`. Models without published
+  control radiation are not analysed. Sensitivities (`eei_sensitivity.csv`): control mean only, and a
+  quadratic fit (relevant where the control N curves, e.g. CAS-ESM2-1-CSM). A leak that changes as the
+  climate warms cannot be detected by any control-based correction.
+- Observations as W m⁻² of Earth's surface (radius 6,371 km; Minière's own tables use a TOA area with
+  +20 km, 0.6 % smaller values). Ocean heat records: rate = OLS slope of the annual 0–2000 m heat content
+  over the window, plus 0.06 W m⁻² for the ocean below 2000 m from 1992 (zero before; von Schuckmann et
+  al. 2023, ±0.03 taken as 1σ, the wider reading), divided by f_ocean = 0.89, the ocean share of Earth's
+  heat gain for 1971–2020 and 2006–2020 in von Schuckmann et al. (2023). Sensitivity: 0.91 (AR6 SPM
+  A.4.2). Wu: mean and SD over the 72 members; Minière: mean and SD over the products that cover the
+  whole window (13 for 2005–2019, 7 for 2015–2024; the shading in fig07 is the product range).
+- Estimators: models are compared with the ocean heat estimates through the OLS slope of their
+  cumulative heat (annual-mean integral of N) over the same years, and with CERES through the window
+  mean of N. The two differ by a few hundredths of a W m⁻² for 10–15-yr windows.
+- Fixed windows, chosen before the comparison: 2005–2019 (the Hakuba window; Wu, Minière and Hakuba
+  tested, CERES shown), 2015–2024 (Minière tested, CERES shown), and the change from 2005–2014 to
+  2015–2024 (CERES and Minière tested). The change cancels both a constant model leak and the CERES
+  anchor. fig07 shows centred 10-yr running rates for description only.
+- Test: z = (model ensemble mean − estimate) / σ, σ² = σ_obs² + σ_iv²(1 + 1/n), with σ_iv the SD of the
+  same statistic over overlapping windows of the control run's residual about its linear fit (all
+  analysed models have a control by construction). σ_obs: member/product SD (Wu, Minière), the published
+  5–95 % / 3.29 (Hakuba), zero for the CERES change (instrument stability uncertainty not included).
+  A model is "lower" or "higher" only if |z| > 1.645 in the same direction against every tested
+  estimate for that window; otherwise it is consistent with at least one.
+  The report also gives the count against the CERES change alone, since CERES and Minière disagree on
+  the 2005–2014 to 2015–2024 increase and the "every estimate" rule hides that.
+- Validation: Minière OLS rates reproduce their published trend table (FIG4) to 0.0001 W m⁻² for 2005–2020
+  and 1960–2020 under both masks (e.g. 0.5741 native domain, 0.5417 reference mask, TOA area). Wu: our
+  20-yr rate converted with their conventions (+0.07, ÷ 0.90) is 0.772–0.780 W m⁻² depending on the window
+  ends, against their 0.775 for 2000–2020. CERES 2001–2024 trend 0.447 W m⁻² per decade (Mauritsen et al.
+  2025: 0.45). Model side: the control-corrected ensemble-mean N averages −0.11 to +0.02 W m⁻² over
+  1850–1900 across the 11 model ensembles. UKESM1-3-LL, the one model with both controls, has similar
+  piControl and esm-piControl means (0.098 and 0.087 W m⁻²).
+- Members reaching 2024: only members with a scenario join have 2022–2024, so some 2015–2024 and change
+  statistics rest on fewer members than the 2005–2019 ones (UKCM2-0-LL 1 of 10, UKESM1-3-LL historical
+  1 of 5, UKCM2a-0-HH 2 of 3); the report table gives n per window where it differs.
 
 ## 3. Caveats
 - Early and non-random sample: CMIP7 holdings are dominated by UK, Canadian and Australian centres;

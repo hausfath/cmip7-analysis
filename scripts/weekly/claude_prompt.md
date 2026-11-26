@@ -17,6 +17,8 @@ which show what changed relative to the last published state. Shell access is li
 A. Bring `README.md` and `METHODS.md` up to date with the regenerated outputs. Edit only these two
    files. Docs describe the current state only, with no history or "previously" wording. Update:
    - the snapshot date ({DATE}) and every `manifest_<date>.csv` reference;
+     drop any sentence saying the 2026-11-25 manifest was rebuilt to add radiation files, since the new
+     manifest supersedes it;
    - totals (files, datasets, GB, models) from `check.json` → `diffs.totals`. Keep the existing
      number formats, for example "3,829" and "about 150 GB";
    - member counts in the METHODS holdings table from `check.json` → `diffs.holdings_changed`.

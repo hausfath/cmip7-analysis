@@ -15,8 +15,11 @@ TAS_EXPS = ["historical", "esm-hist", "piControl", "esm-piControl", "abrupt-4xCO
             "scen7-h", "scen7-hl", "scen7-m", "scen7-ml", "scen7-l", "scen7-vl", "scen7-ln",
             "esm-scen7-h", "esm-scen7-hl", "esm-scen7-m", "esm-scen7-ml", "esm-scen7-l",
             "esm-scen7-vl", "esm-scen7-ln"]
-# TOA radiation needed for the Gregory regression
-RAD_EXPS = ["piControl", "abrupt-4xCO2"]
+# TOA radiation: Gregory regression (piControl, abrupt-4xCO2) and Earth energy imbalance
+# (historical runs, their controls, and the first scenario years up to RAD_SCEN_LAST)
+RAD_EXPS = ["piControl", "abrupt-4xCO2", "esm-piControl", "historical", "esm-hist",
+            "scen7-h", "scen7-m", "scen7-vl", "esm-scen7-h", "esm-scen7-m", "esm-scen7-vl"]
+RAD_SCEN_LAST = 2024
 
 KEYF = ["drs_specs", "project", "activity_id", "institution_id", "source_id", "experiment_id",
         "variant_label", "region", "frequency", "variable_id", "branding", "grid_label"]
@@ -39,8 +42,11 @@ def query(variable, branding, exps):
 
 
 if __name__ == "__main__":
-    df = pd.concat([query("tas", "tavg-h2m-hxy-u", TAS_EXPS),
-                    query(["rsdt", "rsut", "rlut"], "tavg-u-hxy-u", RAD_EXPS)], ignore_index=True)
+    rad = query(["rsdt", "rsut", "rlut"], "tavg-u-hxy-u", RAD_EXPS)
+    # scenario radiation is used only up to RAD_SCEN_LAST: drop files that start later
+    scen = rad.experiment_id.str.contains("scen7")
+    rad = rad[~scen | (rad.file_start.str[:4].astype(int) <= RAD_SCEN_LAST)]
+    df = pd.concat([query("tas", "tavg-h2m-hxy-u", TAS_EXPS), rad], ignore_index=True)
     # Keep only the latest version of each dataset
     df["dskey"] = df[KEYF].agg(".".join, axis=1)
     latest = df.groupby("dskey").version.transform("max")

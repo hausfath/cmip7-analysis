@@ -83,8 +83,8 @@ ul { margin: 0; padding-left: 1.2em; display: grid; gap: 6px; }
   period and with CMIP6 for effective climate sensitivity (ECS) and transient climate response (TCR). The sample is
   small (6 of 13 models on ESGF are from UK, Canadian and Australian centres), so these are model-by-model results, not an ensemble
   assessment. FGOALS-f3-L has only scenario runs whose declared parent historical run is not yet published. GFDL-ESM4p5 has only a control run so far. These are listed in the holdings table but not analysed.</p>
-  <div class="meta"><span>11 models analysed (13 on ESGF)</span><span>3,898 files · 153 GB streamed</span>
-  <span>597 datasets · all CC-BY-4.0</span><span>temperatures in °C vs 1850–1900</span>
+  <div class="meta"><span>11 models analysed (13 on ESGF)</span><span>8,727 files · 361 GB streamed</span>
+  <span>2,192 datasets · all CC-BY-4.0</span><span>temperatures in °C vs 1850–1900</span>
   <span><a href="https://github.com/hausfath/cmip7-analysis">Code and data</a></span></div>
 </header>
 
@@ -175,6 +175,52 @@ ul { margin: 0; padding-left: 1.2em; display: grid; gap: 6px; }
 </section>
 
 <section>
+  <h2>Earth's energy imbalance</h2>
+  <div class="prose">
+    <p>Model energy imbalance is the net top-of-atmosphere flux (<code>rsdt − rsut − rlut</code>) of the concentration- and
+    emissions-driven historical runs, continued to 2024 with the same scenario joins as above. Most models do not conserve
+    energy exactly, so each member has the linear fit to its control run's net flux removed at the contemporaneous control
+    years. That correction is mostly a constant leak: control-run mean net flux ranges from −0.29 to
+    0.67 W m⁻² across the 7 models with published control radiation. Without control radiation,
+    CNRM-ESM2-1e, EC-Earth3-ESM-1-1, FGOALS-g3-5, KACE-2-0-G are not analysed.</p>
+    <p>The observational estimates are rates of heat gain per m² of Earth's surface. For the ocean heat content records
+    (<a href="https://doi.org/10.1073/pnas.2408839122">Wu et al. 2025</a>, 72 members;
+    <a href="https://doi.org/10.5194/essd-2026-106">Minière et al. 2026</a>, preprint, 13 products),
+    the 0–2000 m rate is an OLS slope over the window, the ocean below 2000 m adds 0.06 W m⁻² from 1992 and the total is
+    divided by the ocean's 89% share of Earth's heat gain (<a href="https://doi.org/10.5194/essd-15-1675-2023">von Schuckmann et al. 2023</a>).
+    <a href="https://doi.org/10.1029/2021GL093624">Hakuba et al. (2021)</a> is used as published. Models are compared with
+    these through the OLS slope of their cumulative heat, the same estimator. CERES EBAF window means are shown for
+    reference: their level is set to an in-situ ocean heating value for July 2005–June 2015
+    (<a href="https://doi.org/10.1175/JCLI-D-17-0208.1">Loeb et al. 2018</a>), so they are not tested as an independent
+    level, but the change between windows is independent of that anchor and is tested.</p>
+    <p>For 2005–2019 the estimates are 0.78 (Wu), 0.70 (Minière),
+    0.76 and 0.94 (Hakuba,
+    hydrographic and geodetic) W m⁻²; CERES averages 0.85. 11 of 11
+    model ensembles (7 of 7 models) agree with at least one.
+    For 2015–2024, Minière gives 0.91 and CERES 1.21 W m⁻²;
+    8 of 9 ensembles with runs to 2024 agree with Minière, the only tested estimate for this window; 1 is higher (UKESM1-3-LL emissions-driven) but below the untested CERES level.
+    The increase from 2005–2014 to 2015–2024 is 0.50 W m⁻² in CERES and
+    0.40 in Minière; 0 of 9 ensembles gain less than both.
+    Taken one estimate at a time, the answers differ: 8 of 9 ensembles gain less than CERES at the 5% level (all but UKCM2-0-LL concentration-driven),
+    while none differ from Minière. The CERES test counts only model internal
+    variability (σ_obs = 0, instrument stability not included), so it is the stricter of the two.</p>
+    <p>A model differs from an estimate if |z| &gt; 1.645, with σ combining the estimate's uncertainty and internal
+    variability of the same statistic in the model's control run, σ_iv²(1 + 1/n). It is reported as lower or higher only
+    if it differs, in the same direction, from every tested estimate for that window (in the table, "consistent" means it
+    agrees with at least one). An ensemble is one model's concentration- or emissions-driven runs.</p>
+  </div>
+  <figure><div class="plate"><img src="figures/fig07_eei_timeseries.png" alt="Energy imbalance over centred 10-yr windows for each model (blue: concentration-driven, orange dashed: emissions-driven; shading: member range) with ocean-heat-based estimates (Wu, Minière) and CERES EBAF." loading="lazy"></div><figcaption>Energy imbalance over centred 10-yr windows for each model (blue: concentration-driven, orange dashed: emissions-driven; shading: member range) with ocean-heat-based estimates (Wu, Minière) and CERES EBAF.</figcaption></figure>
+  <figure><div class="plate"><img src="figures/fig08_eei_windows.png" alt="Energy imbalance for 2005–2019 and 2015–2024 and the change between 2005–2014 and 2015–2024: model ensemble means and members against observational estimates." loading="lazy"></div><figcaption>Energy imbalance for 2005–2019 and 2015–2024 and the change between 2005–2014 and 2015–2024: model ensemble means and members against observational estimates.</figcaption></figure>
+  <div class="tw"><table class="num"><thead><tr><th>Model</th><th>Track</th><th>n</th><th>2005–2019 (W m⁻²)</th><th>Test</th><th>2015–2024 (W m⁻²)</th><th>Test</th><th>Change (W m⁻²)</th><th>Test</th></tr></thead><tbody><tr><td><b>ACCESS-ESM1-6</b></td><td>Emissions</td><td>30</td><td>0.82 (0.68 to 0.93)</td><td>consistent</td><td>0.97 (0.82 to 1.14)</td><td>consistent</td><td>0.26 (0.06 to 0.45)</td><td>consistent</td></tr><tr><td><b>ACCESS-ESM1-6</b></td><td>Concentration</td><td>10</td><td>0.82 (0.74 to 0.93)</td><td>consistent</td><td>0.96 (0.86 to 1.07)</td><td>consistent</td><td>0.23 (0.02 to 0.53)</td><td>consistent</td></tr><tr><td><b>CAS-ESM2-1-CSM</b></td><td>Concentration</td><td>1</td><td>0.65</td><td>consistent</td><td>–</td><td>–</td><td>–</td><td>–</td></tr><tr><td><b>CanESM5-1</b></td><td>Emissions</td><td>25</td><td>0.87 (0.79 to 0.94)</td><td>consistent</td><td>1.04 (0.94 to 1.14)</td><td>consistent</td><td>0.26 (0.08 to 0.40)</td><td>consistent</td></tr><tr><td><b>CanESM5-1</b></td><td>Concentration</td><td>17</td><td>0.85 (0.79 to 0.92)</td><td>consistent</td><td>–</td><td>–</td><td>–</td><td>–</td></tr><tr><td><b>CanESM6-0-MR</b></td><td>Emissions</td><td>25</td><td>0.84 (0.78 to 0.92)</td><td>consistent</td><td>0.98 (0.86 to 1.12)</td><td>consistent</td><td>0.24 (−0.03 to 0.43)</td><td>consistent</td></tr><tr><td><b>CanESM6-0-MR</b></td><td>Concentration</td><td>25</td><td>0.80 (0.73 to 0.89)</td><td>consistent</td><td>0.95 (0.85 to 1.10)</td><td>consistent</td><td>0.26 (0.03 to 0.47)</td><td>consistent</td></tr><tr><td><b>UKCM2-0-LL</b></td><td>Concentration</td><td>10</td><td>0.67 (0.46 to 0.83)</td><td>consistent</td><td>0.82, n=1</td><td>consistent</td><td>0.23, n=1</td><td>consistent</td></tr><tr><td><b>UKCM2a-0-HH</b></td><td>Concentration</td><td>3</td><td>0.94 (0.93 to 0.97)</td><td>consistent</td><td>1.04 (0.98 to 1.10), n=2</td><td>consistent</td><td>0.12 (0.06 to 0.18), n=2</td><td>consistent</td></tr><tr><td><b>UKESM1-3-LL</b></td><td>Emissions</td><td>8</td><td>1.01 (0.90 to 1.22)</td><td>consistent</td><td>1.15 (0.98 to 1.26)</td><td>higher</td><td>0.25 (0.12 to 0.40)</td><td>consistent</td></tr><tr><td><b>UKESM1-3-LL</b></td><td>Concentration</td><td>5</td><td>1.00 (0.92 to 1.12)</td><td>consistent</td><td>1.05, n=1</td><td>consistent</td><td>0.15, n=1</td><td>consistent</td></tr></tbody></table></div>
+  <p class="note">Sensitivities in <code>outputs/eei_sensitivity.csv</code> (largest shift from the main choice): control
+  mean (0.03 W m⁻²) or quadratic fit (0.01) instead of the
+  linear fit; 91% instead of 89% ocean share (AR6; 0.02); Minière's quasi-global mask
+  (60°S–60°N, excluding water shallower than 300 m) instead of each product's native domain (0.05).
+  Where fewer members reach 2024 than the full ensemble, the table gives n for that window. The ±0.03 W m⁻² deep-ocean
+  uncertainty is taken as 1σ, the wider reading.</p>
+</section>
+
+<section>
   <h2>Validation and data checks</h2>
   <div class="prose">
     <p>Before any CMIP7 numbers were computed, the code was run on three CMIP6 models with published values. The
@@ -185,7 +231,7 @@ ul { margin: 0; padding-left: 1.2em; display: grid; gap: 6px; }
   </div>
   <div class="tw"><table class="num"><thead><tr><th>CMIP6 run</th><th>ECS (ours)</th><th>ECS Zelinka v2.2</th><th>Δ</th><th>ERF₂ₓ</th><th>Δ</th><th>TCR linear</th><th>TCR AR6</th><th>Δ</th><th>TCR rm21</th><th>Δ vs H22</th></tr></thead><tbody><tr><td><b>CanESM5</b> r1i1p1f1 <span class='tag'>validation</span></td><td>5.653</td><td>5.639</td><td>0.014</td><td>3.678</td><td>0.003</td><td>2.739</td><td>2.74</td><td>-0.001</td><td>2.775</td><td>0.063</td></tr><tr><td><b>UKESM1-0-LL</b> r1i1p1f2 <span class='tag'>validation</span></td><td>5.358</td><td>5.359</td><td>-0.001</td><td>3.607</td><td>-0.001</td><td>2.786</td><td>2.79</td><td>-0.004</td><td>2.836</td><td>0.067</td></tr><tr><td><b>ACCESS-ESM1-5</b> r1i1p1f1 <span class='tag'>validation</span></td><td>3.889</td><td>3.884</td><td>0.005</td><td>2.830</td><td>0.000</td><td>1.947</td><td>1.95</td><td>-0.003</td><td>2.006</td><td>0.035</td></tr><tr><td><b>CanESM5</b> r1i1p2f1</td><td>5.633</td><td>5.616</td><td>0.017</td><td>3.640</td><td>0.000</td><td>2.640</td><td>–</td><td>–</td><td>2.622</td><td>–</td></tr><tr><td><b>HadGEM3-GC31-LL</b> r1i1p1f3</td><td>5.545</td><td>5.546</td><td>-0.000</td><td>3.488</td><td>0.001</td><td>2.552</td><td>2.55</td><td>0.002</td><td>2.528</td><td>0.038</td></tr><tr><td><b>HadGEM3-GC31-MM</b> r1i1p1f3</td><td>5.433</td><td>5.440</td><td>-0.007</td><td>3.569</td><td>0.002</td><td>2.579</td><td>2.58</td><td>-0.001</td><td>2.649</td><td>0.052</td></tr><tr><td><b>CNRM-ESM2-1</b> r1i1p1f2</td><td>4.774</td><td>4.794</td><td>-0.020</td><td>2.954</td><td>-0.016</td><td>1.853</td><td>1.86</td><td>-0.007</td><td>1.884</td><td>0.051</td></tr></tbody></table></div>
   <div class="prose"><ul>
-    <li>3,888 of 3,898 files matched their ESGF sha256 checksum. The other 10 (CanESM5-1 piControl: 8; KACE-2-0-G historical: 1; KACE-2-0-G scen7-vl: 1)
+    <li>8,714 of 8,727 files matched their ESGF sha256 checksum. The other 13 (CanESM5-1 piControl: 8; KACE-2-0-G historical: 1; KACE-2-0-G scen7-vl: 4)
     differ from the index but match the size the data node serves, consistent with files rewritten after indexing. They are
     complete and readable but cannot be checksum-verified, so CanESM5-1's ECS rests on the server copy of its control.</li>
     <li>Scenario runs are joined to their historical parent by metadata, not variant label: some UKESM1-3-LL esm-scen7 f1
